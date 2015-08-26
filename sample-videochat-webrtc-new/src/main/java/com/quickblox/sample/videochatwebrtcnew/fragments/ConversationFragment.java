@@ -123,8 +123,7 @@ public class ConversationFragment extends Fragment implements Serializable {
             switchCameraToggle.setVisibility(View.INVISIBLE);
 
             localVideoView.setVisibility(View.INVISIBLE);
-            remoteVideoView1.setVisibility(View.INVISIBLE);
-            remoteVideoView2.setVisibility(View.INVISIBLE);
+            gridView.setVisibility(View.INVISIBLE);
 
             imgMyCameraOff.setVisibility(View.INVISIBLE);
         }
