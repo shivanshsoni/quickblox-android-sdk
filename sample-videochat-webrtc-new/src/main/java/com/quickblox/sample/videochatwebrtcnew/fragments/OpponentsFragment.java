@@ -20,6 +20,7 @@ import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsAdapter;
+import com.quickblox.sample.videochatwebrtcnew.resources.ResourceManager;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCClient;
@@ -51,6 +52,7 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
     private View view=null;
     private ProgressDialog progresDialog;
     private ListView opponentsList;
+    private ResourceManager resourceManager;
 
 
     public static OpponentsFragment getInstance() {
@@ -78,7 +80,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
         progresDialog.show();
 
         initOpponentListAdapter();
-
 //         Log.d(TAG, "onCreateView() from OpponentsFragment Level 2");
         return view;
     }
@@ -154,6 +155,8 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
 
         btnAudioCall.setOnClickListener(this);
         btnVideoCall.setOnClickListener(this);
+        /*view.findViewById(R.id.crtChnnal).setOnClickListener(this);
+        view.findViewById(R.id.closeChnnal).setOnClickListener(this);*/
 
         opponentsList = (ListView) view.findViewById(R.id.opponentsList);
     }
@@ -181,7 +184,13 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
                 case R.id.btnVideoCall:
                     // get call type
                     qbConferenceType = QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO;
+
                     break;
+                /*case R.id.crtChnnal:
+
+                    break;
+                case R.id.closeChnnal:
+                    break;*/
             }
 
             Map<String, String> userInfo = new HashMap<>();
@@ -189,9 +198,15 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
             userInfo.put("my_avatar_url", "avatar_reference");
 
             ((CallActivity) getActivity())
-                    .addConversationFragmentStartCall(getOpponentsIds(opponentsAdapter.getSelected()),
+                    .addConversationFragmentStartCall(opponentsAdapter.getSelected(),
                             qbConferenceType, userInfo);
 
+    }
+
+    private void createResourceManager(){
+        if (resourceManager == null) {
+            resourceManager = new ResourceManager();
+        }
     }
 
     public static ArrayList<Integer> getOpponentsIds(List<QBUser> opponents){
@@ -227,7 +242,7 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
         switch (item.getItemId()) {
             case R.id.log_out:
                 try {
-                    QBRTCClient.getInstance().close(true);
+                    QBRTCClient.getInstance(getActivity()).destroy();
                     QBChatService.getInstance().logout();
                 } catch (SmackException.NotConnectedException e) {
                     e.printStackTrace();

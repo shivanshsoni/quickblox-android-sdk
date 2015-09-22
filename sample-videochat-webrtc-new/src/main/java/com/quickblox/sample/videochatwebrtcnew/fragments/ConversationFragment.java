@@ -8,14 +8,15 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.GridView;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,8 +32,16 @@ import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsFromCallAdapter
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
+import com.quickblox.videochat.webrtc.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
 import com.quickblox.videochat.webrtc.QBRTCTypes;
+import com.quickblox.videochat.webrtc.callbacks.QBRTCClientConnectionCallbacks;
+import com.quickblox.videochat.webrtc.callbacks.QBRTCClientVideoTracksCallbacks;
+import com.quickblox.videochat.webrtc.view.QBGLVideoView;
+import com.quickblox.videochat.webrtc.view.QBRTCVideoTrack;
+import com.quickblox.videochat.webrtc.view.VideoCallBacks;
+
+import org.webrtc.VideoRenderer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,17 +52,18 @@ import java.util.Map;
 /**
  * Created by tereha on 16.02.15.
  */
-public class ConversationFragment extends Fragment implements Serializable {
+public class ConversationFragment extends Fragment implements Serializable, QBRTCClientVideoTracksCallbacks, QBRTCClientConnectionCallbacks, CallActivity.QBRTCSessionUserCallback {
+
+    public static final String CALLER_NAME = "caller_name";
+    public static final String SESSION_ID = "sessionID";
+    public static final String START_CONVERSATION_REASON = "start_conversation_reason";
 
     private String TAG = ConversationFragment.class.getSimpleName();
-    private ArrayList<Integer> opponents;
+    private ArrayList<QBUser> opponents;
     private int qbConferenceType;
     private int startReason;
     private String sessionID;
 
-    private TextView opponentNumber;
-    private TextView connectionStatus;
-    private ImageView opponentAvatar;
     private ToggleButton cameraToggle;
     private ToggleButton switchCameraToggle;
     private ToggleButton dynamicToggleVideoCall;
@@ -63,12 +73,6 @@ public class ConversationFragment extends Fragment implements Serializable {
     private TextView incUserName;
     private View view;
     private Map<String, String> userInfo;
-    private View opponentItemView;
-    private HorizontalScrollView camerasOpponentsList;
-//    public static LinearLayout opponentsFromCall;
-    private LayoutInflater inflater;
-    private ViewGroup container;
-    private Bundle savedInstanceState;
     private boolean isVideoEnabled = true;
     private boolean isAudioEnabled = true;
     private List<QBUser> allUsers = new ArrayList<>();
@@ -78,43 +82,67 @@ public class ConversationFragment extends Fragment implements Serializable {
     private LinearLayout noVideoImageContainer;
     private boolean isMessageProcessed;
     private MediaPlayer ringtone;
-    private View localVideoView;
-    private View remoteVideoView1;
-    private View remoteVideoView2;
+    private QBGLVideoView localVideoView;
     private IntentFilter intentFilter;
     private AudioStreamReceiver audioStreamReceiver;
     private CameraState cameraState = CameraState.NONE;
-    private GridView gridView;
+    private RecyclerView recyclerView;
+    private SparseArray<OpponentsFromCallAdapter.ViewHolder> opponentViewHolders;
 
+    public static ConversationFragment newInstance(List<QBUser> opponents, String callerName,
+                        QBRTCTypes.QBConferenceType qbConferenceType,
+                                                   Map<String, String> userInfo,  CallActivity.StartConversetionReason reason,
+                                                   String sesionnId){
+
+        ConversationFragment fragment = new ConversationFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(ApplicationSingleton.CONFERENCE_TYPE, qbConferenceType.getValue());
+        bundle.putInt(START_CONVERSATION_REASON, StartConversetionReason.OUTCOME_CALL_MADE.ordinal());
+        bundle.putString(CALLER_NAME, callerName);
+        bundle.putSerializable(ApplicationSingleton.OPPONENTS, (Serializable) opponents);
+        if (userInfo != null) {
+            for (String key : userInfo.keySet()) {
+                bundle.putString("UserInfo:" + key, userInfo.get(key));
+            }
+        }
+        bundle.putInt(START_CONVERSATION_REASON, reason.ordinal());
+        if (sesionnId != null) {
+            bundle.putString(SESSION_ID, sesionnId);
+        }
+        fragment.setArguments(bundle);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_conversation, container, false);
-        this.inflater = inflater;
-        this.container = container;
         Log.d(TAG, "Fragment. Thread id: " + Thread.currentThread().getId());
 
         ((CallActivity) getActivity()).initActionBarWithTimer();
 
         if (getArguments() != null) {
-            opponents = getArguments().getIntegerArrayList(ApplicationSingleton.OPPONENTS);
+            opponents = (ArrayList<QBUser>) getArguments().getSerializable(ApplicationSingleton.OPPONENTS);
             qbConferenceType = getArguments().getInt(ApplicationSingleton.CONFERENCE_TYPE);
             startReason = getArguments().getInt(CallActivity.START_CONVERSATION_REASON);
             sessionID = getArguments().getString(CallActivity.SESSION_ID);
             callerName = getArguments().getString(CallActivity.CALLER_NAME);
 
             Log.d(TAG, "CALLER_NAME: " + callerName);
-
+            Log.d(TAG, "opponents: " + opponents.toString());
         }
 
         initViews(view);
         initButtonsListener();
-
+        initSessionListener();
 //        createOpponentsList(opponents);
         setUpUiByCallType(qbConferenceType);
 
         return view;
 
+    }
+
+    private void initSessionListener() {
+        ((CallActivity) getActivity()).addVideoTrackCallbacksListener(this);
     }
 
     private void setUpUiByCallType(int qbConferenceType) {
@@ -123,7 +151,7 @@ public class ConversationFragment extends Fragment implements Serializable {
             switchCameraToggle.setVisibility(View.INVISIBLE);
 
             localVideoView.setVisibility(View.INVISIBLE);
-            gridView.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
 
             imgMyCameraOff.setVisibility(View.INVISIBLE);
         }
@@ -164,6 +192,8 @@ public class ConversationFragment extends Fragment implements Serializable {
             }
             isMessageProcessed = true;
         }
+        ((CallActivity) getActivity()).addTCClientConnectionCallback(this);
+        ((CallActivity) getActivity()).addRTCSessionUserCallback(this);
     }
 
     private void startOutBeep() {
@@ -203,19 +233,19 @@ public class ConversationFragment extends Fragment implements Serializable {
 
     private void initViews(View view) {
 
-
-        localVideoView = view.findViewById(R.id.localVideoVidew);
-        /*remoteVideoView1 = view.findViewById(R.id.remoteVideoView1);
-        remoteVideoView2 = view.findViewById(R.id.remoteVideoView1);*/
-        gridView = (GridView) view.findViewById(R.id.grid_opponents);
-        gridView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        localVideoView = (QBGLVideoView) view.findViewById(R.id.localVideoVidew);
+        recyclerView = (RecyclerView) view.findViewById(R.id.grid_opponents);
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 Log.i(TAG, "onGlobalLayout");
-                gridView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, gridView));
-                gridView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, recyclerView.getMeasuredWidth() / 3,
+                        recyclerView.getMeasuredHeight() / 2));
+                recyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
         });
+        opponentViewHolders = new SparseArray<>(opponents.size());
 //        opponentsFromCall = (LinearLayout) view.findViewById(R.id.opponentsFromCall);
 
         cameraToggle = (ToggleButton) view.findViewById(R.id.cameraToggle);
@@ -236,6 +266,7 @@ public class ConversationFragment extends Fragment implements Serializable {
 
         actionButtonsEnabled(false);
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -252,7 +283,7 @@ public class ConversationFragment extends Fragment implements Serializable {
     public void onPause() {
         // If camera state is CameraState.ENABLED_FROM_USER or CameraState.NONE
         // than we turn off cam
-        if(cameraState != CameraState.DISABLED_FROM_USER) {
+        if (cameraState != CameraState.DISABLED_FROM_USER) {
             toggleCamera(false);
         }
 
@@ -264,6 +295,8 @@ public class ConversationFragment extends Fragment implements Serializable {
         super.onStop();
         stopOutBeep();
         getActivity().unregisterReceiver(audioStreamReceiver);
+        ((CallActivity) getActivity()).removeRTCClientConnectionCallback(this);
+        ((CallActivity) getActivity()).removeRTCSessionUserCallback(this);
     }
 
     private void initButtonsListener() {
@@ -288,13 +321,13 @@ public class ConversationFragment extends Fragment implements Serializable {
             @Override
             public void onClick(View v) {
 //                if (((CallActivity) getActivity()).getCurrentSession() != null) {
-                    if (cameraState != CameraState.DISABLED_FROM_USER) {
-                        toggleCamera(false);
-                        cameraState = CameraState.DISABLED_FROM_USER;
-                    } else {
-                        toggleCamera(true);
-                        cameraState = CameraState.ENABLED_FROM_USER;
-                    }
+                if (cameraState != CameraState.DISABLED_FROM_USER) {
+                    toggleCamera(false);
+                    cameraState = CameraState.DISABLED_FROM_USER;
+                } else {
+                    toggleCamera(true);
+                    cameraState = CameraState.ENABLED_FROM_USER;
+                }
 //                }
 
             }
@@ -375,6 +408,126 @@ public class ConversationFragment extends Fragment implements Serializable {
         }
     }
 
+    @Override
+    public void onLocalVideoTrackReceive(QBRTCSession qbrtcSession, QBRTCVideoTrack videoTrack) {
+        if (localVideoView != null) {
+            videoTrack.addRenderer(new VideoRenderer(new VideoCallBacks(localVideoView, QBGLVideoView.Endpoint.LOCAL)));
+            localVideoView.setVideoTrack(videoTrack, QBGLVideoView.Endpoint.LOCAL);
+            Log.d(TAG, "onLocalVideoTrackReceive() is raned");
+        }
+    }
+
+    @Override
+    public void onRemoteVideoTrackReceive(QBRTCSession session, QBRTCVideoTrack videoTrack, Integer userID) {
+        Log.d(TAG, "onRemoteVideoTrackReceive for opponent= " + userID);
+        OpponentsFromCallAdapter.ViewHolder itemHolder = getViewHolderForOpponent(userID);
+        if (itemHolder == null) {
+            return;
+        }
+        QBGLVideoView remoteVideoView = itemHolder.getOpponentView();
+        if (remoteVideoView != null) {
+            fillVideoView(remoteVideoView, videoTrack);
+        }
+    }
+
+    private OpponentsFromCallAdapter.ViewHolder getViewHolderForOpponent(Integer userID) {
+        OpponentsFromCallAdapter.ViewHolder holder = opponentViewHolders.get(userID);
+        if (holder == null) {
+            holder = findHolder(userID);
+            opponentViewHolders.append(userID, holder);
+        }
+        return holder;
+    }
+
+    private OpponentsFromCallAdapter.ViewHolder findHolder(Integer userID){
+        int childCount = recyclerView.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View childView = recyclerView.getChildAt(i);
+            OpponentsFromCallAdapter.ViewHolder childViewHolder = (OpponentsFromCallAdapter.ViewHolder) recyclerView.getChildViewHolder(childView);
+            Log.d(TAG, "getViewForOpponent holder user id is : " + childViewHolder.getUserId());
+            if (userID.equals(childViewHolder.getUserId())) {
+               return childViewHolder;
+            }
+        }
+        return null;
+    }
+
+    private void fillVideoView(QBGLVideoView videoView, QBRTCVideoTrack videoTrack) {
+        VideoRenderer remouteRenderer = new VideoRenderer(new VideoCallBacks(videoView, QBGLVideoView.Endpoint.REMOTE));
+        videoTrack.addRenderer(remouteRenderer);
+        videoView.setVideoTrack(videoTrack, QBGLVideoView.Endpoint.REMOTE);
+        Log.d(TAG, "onRemoteVideoTrackReceive() is rendering");
+    }
+
+    private void setStatusForOpponent(int userId, final String status) {
+        final OpponentsFromCallAdapter.ViewHolder holder = getViewHolderForOpponent(userId);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                holder.setStatus(status);
+            }
+        });
+    }
+
+    @Override
+    public void onStartConnectToUser(QBRTCSession qbrtcSession, Integer userId) {
+        stopOutBeep();
+        setStatusForOpponent(userId, getString(R.string.checking));
+    }
+
+    @Override
+    public void onConnectedToUser(QBRTCSession qbrtcSession, Integer integer) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                actionButtonsEnabled(true);
+            }
+        });
+        setStatusForOpponent(integer, getString(R.string.connected));
+    }
+
+
+    @Override
+    public void onConnectionClosedForUser(QBRTCSession qbrtcSession, Integer integer) {
+        setStatusForOpponent(integer, getString(R.string.closed));
+    }
+
+    @Override
+    public void onDisconnectedFromUser(QBRTCSession qbrtcSession, Integer integer) {
+        setStatusForOpponent(integer, getString(R.string.disconnected));
+    }
+
+    @Override
+    public void onDisconnectedTimeoutFromUser(QBRTCSession qbrtcSession, Integer integer) {
+        setStatusForOpponent(integer, getString(R.string.time_out));
+    }
+
+    @Override
+    public void onConnectionFailedWithUser(QBRTCSession qbrtcSession, Integer integer) {
+        setStatusForOpponent(integer, getString(R.string.failed));
+    }
+
+    @Override
+    public void onError(QBRTCSession qbrtcSession, QBRTCException e) {
+
+    }
+
+    @Override
+    public void onUserNotAnswer(QBRTCSession session, Integer userId) {
+        setStatusForOpponent(userId, getString(R.string.noAnswer));
+    }
+
+    @Override
+    public void onCallRejectByUser(QBRTCSession session, Integer userId, Map<String, String> userInfo) {
+        setStatusForOpponent(userId, getString(R.string.rejected));
+    }
+
+    @Override
+    public void onReceiveHangUpFromUser(QBRTCSession session, Integer userId) {
+        setStatusForOpponent(userId, getString(R.string.hungUp));
+    }
+
+
     public static enum StartConversetionReason {
         INCOME_CALL_FOR_ACCEPTION,
         OUTCOME_CALL_MADE;
@@ -391,42 +544,6 @@ public class ConversationFragment extends Fragment implements Serializable {
             }
         }
         return opponentsList;
-    }
-
-//    private void createOpponentsList(List<Integer> opponents) {
-//        if (opponents.size() != 0) {
-//            for (Integer i : opponents) {
-//                addOpponentPreviewToList(i, opponentsFromCall);
-//            }
-//        }
-//    }
-
-    private void addOpponentPreviewToList(Integer userID, LinearLayout opponentsFromCall) {
-
-        if (opponentsFromCall.findViewById(userID) == null) {
-
-            View opponentItemView = inflater.inflate(R.layout.list_item_opponent_from_call, opponentsFromCall, false);
-            opponentItemView.setId(userID);
-
-            opponentItemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Main opponent Selected");
-                }
-            });
-
-            TextView opponentNumber = (TextView) opponentItemView.findViewById(R.id.opponentNumber);
-            opponentNumber.setText(String.valueOf(ListUsersActivity.getUserIndex(userID)));
-            opponentNumber.setBackgroundResource(ListUsersActivity.resourceSelector
-                    (ListUsersActivity.getUserIndex(userID)));
-
-            ImageView opponentAvatar = (ImageView) opponentItemView.findViewById(R.id.opponentAvatar);
-            opponentAvatar.setImageResource(R.drawable.ic_noavatar);
-
-            opponentsFromCall.addView(opponentItemView);
-        } else {
-            opponentsFromCall.addView(opponentsFromCall.findViewById(userID));
-        }
     }
 
     private String getCallerName(QBRTCSession session) {
@@ -448,13 +565,13 @@ public class ConversationFragment extends Fragment implements Serializable {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if (intent.getAction().equals(AudioManager.ACTION_HEADSET_PLUG)){
+            if (intent.getAction().equals(AudioManager.ACTION_HEADSET_PLUG)) {
                 Log.d(TAG, "ACTION_HEADSET_PLUG " + intent.getIntExtra("state", -1));
-            } else if (intent.getAction().equals(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)){
+            } else if (intent.getAction().equals(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)) {
                 Log.d(TAG, "ACTION_SCO_AUDIO_STATE_UPDATED " + intent.getIntExtra("EXTRA_SCO_AUDIO_STATE", -2));
             }
 
-            if (intent.getIntExtra("state", -1) == 0 /*|| intent.getIntExtra("EXTRA_SCO_AUDIO_STATE", -1) == 0*/){
+            if (intent.getIntExtra("state", -1) == 0 /*|| intent.getIntExtra("EXTRA_SCO_AUDIO_STATE", -1) == 0*/) {
                 dynamicToggleVideoCall.setChecked(false);
             } else if (intent.getIntExtra("state", -1) == 1) {
                 dynamicToggleVideoCall.setChecked(true);

@@ -12,7 +12,7 @@
         android:layout_height="100dp"
         android:layout_alignParentRight="true"/>
 
-    <GridView android:id="@+id/grid_opponents"
+    <android.support.v7.widget.RecyclerView android:id="@+id/grid_opponents"
         android:horizontalSpacing="5dp"
         android:verticalSpacing="5dp"
         android:layout_below="@+id/localVideoVidew"
@@ -20,7 +20,7 @@
         android:numColumns="3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    </GridView>
+    </android.support.v7.widget.RecyclerView>
 
     <include
         android:id="@+id/element_set_video_buttons"

@@ -1,16 +1,15 @@
 package com.quickblox.sample.videochatwebrtcnew.adapters;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.view.QBGLVideoView;
 
 import java.util.List;
@@ -18,7 +17,10 @@ import java.util.List;
 /**
  * Created by tereha on 24.02.15.
  */
-public class OpponentsFromCallAdapter extends BaseAdapter {
+public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFromCallAdapter.ViewHolder> {
+
+    public static final int OPPONENT = 1;
+    public static final int HOLDER = 2;
 
     private static final int NUM_IN_ROW = 3;
     private static final String TAG = OpponentsFromCallAdapter.class.getSimpleName();
@@ -26,28 +28,42 @@ public class OpponentsFromCallAdapter extends BaseAdapter {
     private final int itemWidth;
 
     private Context context;
-    private List<Integer> opponents;
+    private List<QBUser> opponents;
     private LayoutInflater inflater;
 
 
-    public OpponentsFromCallAdapter(Context context, List<Integer> users, GridView gridView) {
+    public OpponentsFromCallAdapter(Context context, List<QBUser> users, int width, int height) {
         this.context = context;
         this.opponents = users;
         this.inflater = LayoutInflater.from(context);
-        itemWidth = gridView.getMeasuredWidth() / NUM_IN_ROW;
-        itemHeight = gridView.getMeasuredHeight() / 2;
+        itemWidth = width;
+        itemHeight = height;
         Log.d(TAG, "item width=" + itemWidth + ", item height=" + itemHeight);
     }
 
-
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return opponents.size();
     }
 
-    @Override
     public Integer getItem(int position) {
-        return opponents.get(position);
+        return opponents.get(position).getId();
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = inflater.inflate(R.layout.list_item_opponent_from_call, null);
+        v.setLayoutParams(new RecyclerView.LayoutParams(itemWidth, itemHeight));
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        final QBUser user = opponents.get(position);
+
+        holder.opponentsName.setText(user.getFullName());
+        holder.setUserId(user.getId());
     }
 
     @Override
@@ -55,22 +71,35 @@ public class OpponentsFromCallAdapter extends BaseAdapter {
         return position;
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Log.d(TAG, "getView=" + position);
-        QBGLVideoView videoView = new QBGLVideoView(context);
-        videoView.setLayoutParams(new AbsListView.LayoutParams(itemWidth, itemHeight));
-        videoView.setTag(opponents.get(position));
-        return videoView;
+
+public static class ViewHolder extends RecyclerView.ViewHolder {
+    TextView opponentsName;
+    TextView connectionStatus;
+    QBGLVideoView opponentView;
+    private int userId;
+
+    public ViewHolder(View itemView) {
+        super(itemView);
+        opponentsName = (TextView) itemView.findViewById(R.id.opponentName);
+        connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
+        opponentView = (QBGLVideoView) itemView.findViewById(R.id.opponentView);
     }
 
-
-    public static class ViewHolder {
-        TextView opponentsNumber;
-        TextView connectionStatus;
-        QBGLVideoView opponentLittleCamera;
-        ImageView opponentAvatar;
-
-
+    public void setStatus(String status){
+        connectionStatus.setText(status);
     }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public QBGLVideoView getOpponentView() {
+        return opponentView;
+    }
+}
+
 }

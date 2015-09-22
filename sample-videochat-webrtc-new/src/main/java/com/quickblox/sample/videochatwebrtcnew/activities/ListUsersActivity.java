@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,6 +27,7 @@ import com.quickblox.users.model.QBUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -36,6 +38,9 @@ import io.fabric.sdk.android.Fabric;
 public class ListUsersActivity extends Activity {
 
     private static final String TAG = "ListUsersActivity";
+
+    private static final long ON_ITEM_CLICK_DELAY = TimeUnit.SECONDS.toMillis(10);
+
     private UsersAdapter usersListAdapter;
     private ListView usersList;
     private ProgressBar loginPB;
@@ -165,22 +170,28 @@ public class ListUsersActivity extends Activity {
     }
 
     private void initUsersList() {
-
-
         usersListAdapter = new UsersAdapter(this, users);
         usersList.setAdapter(usersListAdapter);
         usersList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                String login = usersListAdapter.getItem(position).getLogin();
-                String password = usersListAdapter.getItem(position).getPassword();
-
-                createSession(login, password);
-            }
-        });
+        usersList.setOnItemClickListener(clicklistener);
     }
+
+    private long upTime = 0l;
+
+    AdapterView.OnItemClickListener clicklistener = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if ((SystemClock.uptimeMillis() - upTime) < ON_ITEM_CLICK_DELAY){
+                return;
+            }
+            upTime = SystemClock.uptimeMillis();
+            String login = usersListAdapter.getItem(position).getLogin();
+            String password = usersListAdapter.getItem(position).getPassword();
+
+            createSession(login, password);
+        }
+    };
+
 
     private void createSession(final String login, final String password) {
 
