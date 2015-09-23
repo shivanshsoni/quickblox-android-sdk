@@ -47,6 +47,7 @@ public class ListUsersActivity extends Activity {
     private Context context;
     private static QBChatService chatService;
     private static ArrayList<User> users = DataHolder.createUsersList();
+    private volatile boolean resultReceived = true;
 
 
     @Override
@@ -181,9 +182,10 @@ public class ListUsersActivity extends Activity {
 
     AdapterView.OnItemClickListener clicklistener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if ((SystemClock.uptimeMillis() - upTime) < ON_ITEM_CLICK_DELAY){
+            if (!resultReceived || (SystemClock.uptimeMillis() - upTime) < ON_ITEM_CLICK_DELAY){
                 return;
             }
+            resultReceived = false;
             upTime = SystemClock.uptimeMillis();
             String login = usersListAdapter.getItem(position).getLogin();
             String password = usersListAdapter.getItem(position).getPassword();
@@ -207,6 +209,7 @@ public class ListUsersActivity extends Activity {
                 loginPB.setVisibility(View.INVISIBLE);
 
                 if (chatService.isLoggedIn()){
+                    resultReceived = true;
                     startCallActivity(login);
                 } else {
                     chatService.login(user, new QBEntityCallbackImpl<QBUser>() {
@@ -214,17 +217,20 @@ public class ListUsersActivity extends Activity {
                         @Override
                         public void onSuccess(QBUser result, Bundle params) {
                             Log.d(TAG, "onSuccess login to chat with params");
+                            resultReceived = true;
                             startCallActivity(login);
                         }
 
                         @Override
                         public void onSuccess() {
                             Log.d(TAG, "onSuccess login to chat");
+                            resultReceived = true;
                             startCallActivity(login);
                         }
 
                         @Override
                         public void onError(List errors) {
+                            resultReceived = true;
                             loginPB.setVisibility(View.INVISIBLE);
                             Toast.makeText(ListUsersActivity.this, "Error when login", Toast.LENGTH_SHORT).show();
                             for (Object error : errors) {
@@ -244,6 +250,7 @@ public class ListUsersActivity extends Activity {
 
             @Override
             public void onError(List<String> errors) {
+                resultReceived = true;
                 loginPB.setVisibility(View.INVISIBLE);
                 Toast.makeText(ListUsersActivity.this, "Error when login, check test users login and password", Toast.LENGTH_SHORT).show();
             }

@@ -5,9 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.DimenRes;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -23,14 +26,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.sample.videochatwebrtcnew.ApplicationSingleton;
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.activities.ListUsersActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsFromCallAdapter;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
-import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
@@ -97,7 +98,6 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         ConversationFragment fragment = new ConversationFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(ApplicationSingleton.CONFERENCE_TYPE, qbConferenceType.getValue());
-        bundle.putInt(START_CONVERSATION_REASON, StartConversetionReason.OUTCOME_CALL_MADE.ordinal());
         bundle.putString(CALLER_NAME, callerName);
         bundle.putSerializable(ApplicationSingleton.OPPONENTS, (Serializable) opponents);
         if (userInfo != null) {
@@ -151,7 +151,6 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             switchCameraToggle.setVisibility(View.INVISIBLE);
 
             localVideoView.setVisibility(View.INVISIBLE);
-            recyclerView.setVisibility(View.INVISIBLE);
 
             imgMyCameraOff.setVisibility(View.INVISIBLE);
         }
@@ -184,7 +183,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         super.onStart();
         QBRTCSession session = ((CallActivity) getActivity()).getCurrentSession();
         if (!isMessageProcessed) {
-            if (startReason == StartConversetionReason.INCOME_CALL_FOR_ACCEPTION.ordinal()) {
+            if (startReason == CallActivity.StartConversetionReason.INCOME_CALL_FOR_ACCEPTION.ordinal()) {
                 session.acceptCall(session.getUserInfo());
             } else {
                 session.startCall(session.getUserInfo());
@@ -235,16 +234,21 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
 
         localVideoView = (QBGLVideoView) view.findViewById(R.id.localVideoVidew);
         recyclerView = (RecyclerView) view.findViewById(R.id.grid_opponents);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), R.dimen.grid_item_divider));
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 Log.i(TAG, "onGlobalLayout");
                 recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, recyclerView.getMeasuredWidth() / 3,
-                        recyclerView.getMeasuredHeight() / 2));
+                        recyclerView.getMeasuredHeight() / 2,
+                        QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO.getValue() == qbConferenceType));
                 recyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
         });
+
+
         opponentViewHolders = new SparseArray<>(opponents.size());
 //        opponentsFromCall = (LinearLayout) view.findViewById(R.id.opponentsFromCall);
 
@@ -527,39 +531,6 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         setStatusForOpponent(userId, getString(R.string.hungUp));
     }
 
-
-    public static enum StartConversetionReason {
-        INCOME_CALL_FOR_ACCEPTION,
-        OUTCOME_CALL_MADE;
-    }
-
-    private List<QBUser> getOpponentsFromCall(ArrayList<Integer> opponents) {
-        ArrayList<QBUser> opponentsList = new ArrayList<>();
-
-        for (Integer opponentId : opponents) {
-            try {
-                opponentsList.add(QBUsers.getUser(opponentId));
-            } catch (QBResponseException e) {
-                e.printStackTrace();
-            }
-        }
-        return opponentsList;
-    }
-
-    private String getCallerName(QBRTCSession session) {
-        String s = new String();
-        int i = session.getCallerID();
-
-        allUsers.addAll(DataHolder.usersList);
-
-        for (QBUser usr : allUsers) {
-            if (usr.getId().equals(i)) {
-                s = usr.getFullName();
-            }
-        }
-        return s;
-    }
-
     private class AudioStreamReceiver extends BroadcastReceiver {
 
         @Override
@@ -588,6 +559,20 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         ENABLED_FROM_USER
     }
 
+    class DividerItemDecoration extends RecyclerView.ItemDecoration{
+
+        private int space;
+
+        public DividerItemDecoration(@NonNull Context context, @DimenRes int dimensionDivider){
+            this.space = context.getResources().getDimensionPixelSize(dimensionDivider);;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.set(space, space, space, space);
+        }
+
+    }
 }
 
 

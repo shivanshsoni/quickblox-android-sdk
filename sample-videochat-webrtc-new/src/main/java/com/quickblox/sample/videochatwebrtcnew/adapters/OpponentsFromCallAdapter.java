@@ -29,12 +29,14 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 
     private Context context;
     private List<QBUser> opponents;
+    private boolean showVideoView;
     private LayoutInflater inflater;
 
 
-    public OpponentsFromCallAdapter(Context context, List<QBUser> users, int width, int height) {
+    public OpponentsFromCallAdapter(Context context, List<QBUser> users, int width, int height, boolean showVideoView) {
         this.context = context;
         this.opponents = users;
+        this.showVideoView = showVideoView;
         this.inflater = LayoutInflater.from(context);
         itemWidth = width;
         itemHeight = height;
@@ -55,6 +57,7 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         View v = inflater.inflate(R.layout.list_item_opponent_from_call, null);
         v.setLayoutParams(new RecyclerView.LayoutParams(itemWidth, itemHeight));
         ViewHolder vh = new ViewHolder(v);
+        vh.showOpponentView(showVideoView);
         return vh;
     }
 
@@ -99,6 +102,10 @@ public static class ViewHolder extends RecyclerView.ViewHolder {
 
     public QBGLVideoView getOpponentView() {
         return opponentView;
+    }
+
+    public void showOpponentView(boolean show){
+        opponentView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }
 

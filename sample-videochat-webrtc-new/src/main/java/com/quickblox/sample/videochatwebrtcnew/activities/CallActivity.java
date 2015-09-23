@@ -11,6 +11,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tereha on 16.02.15.
@@ -218,6 +220,15 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         }
     }
 
+    private void startIncomeCallTimer() {
+        showIncomingCallWindowTaskHandler.postAtTime(showIncomingCallWindowTask, SystemClock.uptimeMillis() + TimeUnit.SECONDS.toMillis(QBRTCConfig.getAnswerTimeInterval()));
+    }
+
+    private void stopIncomeCallTimer() {
+        Log.d(TAG, "stopIncomeCallTimer");
+        showIncomingCallWindowTaskHandler.removeCallbacks(showIncomingCallWindowTask);
+    }
+
 
     @Override
     protected void onStart() {
@@ -283,6 +294,8 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                     addIncomeCallFragment(session);
 
                     isInCommingCall = true;
+                    initIncommingCallTask();
+                    startIncomeCallTimer();
                 } else {
                     Log.d(TAG, "Stop new session. Device now is busy");
                     session.rejectCall(null);
@@ -363,6 +376,9 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (isInCommingCall) {
+                    stopIncomeCallTimer();
+                }
 
                 startTimer();
                 Log.d(TAG, "onConnectedToUser() is started");
@@ -397,6 +413,10 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                 String curSession = (getCurrentSession() == null) ? null : getCurrentSession().getSessionID();
 
                 if (session.equals(getCurrentSession())) {
+
+                    if (isInCommingCall) {
+                        stopIncomeCallTimer();
+                    }
 
                     Log.d(TAG, "Stop session");
                     addOpponentsFragment();
