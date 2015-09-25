@@ -36,8 +36,8 @@ import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
 import com.quickblox.videochat.webrtc.QBRTCTypes;
-import com.quickblox.videochat.webrtc.callbacks.QBRTCClientConnectionCallbacks;
 import com.quickblox.videochat.webrtc.callbacks.QBRTCClientVideoTracksCallbacks;
+import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
 import com.quickblox.videochat.webrtc.view.QBGLVideoView;
 import com.quickblox.videochat.webrtc.view.QBRTCVideoTrack;
 import com.quickblox.videochat.webrtc.view.VideoCallBacks;
@@ -53,7 +53,7 @@ import java.util.Map;
 /**
  * Created by tereha on 16.02.15.
  */
-public class ConversationFragment extends Fragment implements Serializable, QBRTCClientVideoTracksCallbacks, QBRTCClientConnectionCallbacks, CallActivity.QBRTCSessionUserCallback {
+public class ConversationFragment extends Fragment implements Serializable, QBRTCClientVideoTracksCallbacks, QBRTCSessionConnectionCallbacks, CallActivity.QBRTCSessionUserCallback {
 
     public static final String CALLER_NAME = "caller_name";
     public static final String SESSION_ID = "sessionID";
@@ -438,7 +438,9 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         OpponentsFromCallAdapter.ViewHolder holder = opponentViewHolders.get(userID);
         if (holder == null) {
             holder = findHolder(userID);
-            opponentViewHolders.append(userID, holder);
+            if (holder != null) {
+                opponentViewHolders.append(userID, holder);
+            }
         }
         return holder;
     }
@@ -465,6 +467,9 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
 
     private void setStatusForOpponent(int userId, final String status) {
         final OpponentsFromCallAdapter.ViewHolder holder = getViewHolderForOpponent(userId);
+        if (holder == null){
+            return;
+        }
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

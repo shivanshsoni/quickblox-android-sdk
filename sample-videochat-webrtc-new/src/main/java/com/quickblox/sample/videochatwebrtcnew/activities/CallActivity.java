@@ -33,9 +33,9 @@ import com.quickblox.videochat.webrtc.QBRTCConfig;
 import com.quickblox.videochat.webrtc.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
 import com.quickblox.videochat.webrtc.QBRTCTypes;
-import com.quickblox.videochat.webrtc.callbacks.QBRTCClientConnectionCallbacks;
 import com.quickblox.videochat.webrtc.callbacks.QBRTCClientSessionCallbacks;
 import com.quickblox.videochat.webrtc.callbacks.QBRTCClientVideoTracksCallbacks;
+import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
 
 import org.jivesoftware.smack.SmackException;
 import org.webrtc.VideoCapturerAndroid;
@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by tereha on 16.02.15.
  */
-public class CallActivity extends BaseLogginedUserActivity implements QBRTCClientSessionCallbacks, QBRTCClientConnectionCallbacks {
+public class CallActivity extends BaseLogginedUserActivity implements QBRTCClientSessionCallbacks, QBRTCSessionConnectionCallbacks {
 
 
     private static final String TAG = CallActivity.class.getSimpleName();
@@ -129,7 +129,6 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         QBRTCConfig.setDebugEnabled(true);
         // Add activity as callback to RTCClient
         rtcClient.addSessionCallbacksListener(this);
-        rtcClient.addConnectionCallbacksListener(this);
         // Start mange QBRTCSessions according to VideoCall parser's callbacks
         rtcClient.prepareToProcessCalls();
     }
@@ -291,6 +290,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                     Log.d(TAG, "Start new session");
 
                     setCurrentSession(session);
+                    session.addSessionCallbacksListener(CallActivity.this);
                     addIncomeCallFragment(session);
 
                     isInCommingCall = true;
@@ -414,6 +414,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
                 if (session.equals(getCurrentSession())) {
 
+                    session.removeSessionnCallbacksListener(CallActivity.this);
                     if (isInCommingCall) {
                         stopIncomeCallTimer();
                     }
@@ -570,12 +571,16 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         rtcClient.addVideoTrackCallbacksListener(videoTracksCallbacks);
     }
 
-    public void addTCClientConnectionCallback(QBRTCClientConnectionCallbacks clientConnectionCallbacks) {
-        rtcClient.addConnectionCallbacksListener(clientConnectionCallbacks);
+    public void addTCClientConnectionCallback(QBRTCSessionConnectionCallbacks clientConnectionCallbacks) {
+        if (currentSession != null) {
+            currentSession.addSessionCallbacksListener(clientConnectionCallbacks);
+        }
     }
 
-    public void removeRTCClientConnectionCallback(QBRTCClientConnectionCallbacks clientConnectionCallbacks) {
-        rtcClient.removeConnectionCallbacksListener(clientConnectionCallbacks);
+    public void removeRTCClientConnectionCallback(QBRTCSessionConnectionCallbacks clientConnectionCallbacks) {
+        if (currentSession != null) {
+            currentSession.removeSessionnCallbacksListener(clientConnectionCallbacks);
+        }
     }
 
     public void addRTCSessionUserCallback(QBRTCSessionUserCallback sessionUserCallback) {
