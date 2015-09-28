@@ -307,7 +307,9 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     @Override
     public void onUserNotAnswer(QBRTCSession session, Integer userID) {
-//        setStateTitle(userID, R.string.noAnswer, View.VISIBLE);
+        if (!session.equals(getCurrentSession())) {
+            return;
+        }
         if (sessionUserCallback != null) {
             sessionUserCallback.onUserNotAnswer(session, userID);
         }
@@ -340,6 +342,9 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     @Override
     public void onCallRejectByUser(QBRTCSession session, Integer userID, Map<String, String> userInfo) {
+        if (!session.equals(getCurrentSession())) {
+            return;
+        }
         if (sessionUserCallback != null) {
             sessionUserCallback.onCallRejectByUser(session, userID, userInfo);
         }
@@ -414,7 +419,6 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
                 if (session.equals(getCurrentSession())) {
 
-                    session.removeSessionnCallbacksListener(CallActivity.this);
                     if (isInCommingCall) {
                         stopIncomeCallTimer();
                     }
@@ -434,7 +438,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     @Override
     public void onSessionStartClose(final QBRTCSession session) {
-
+        session.removeSessionnCallbacksListener(CallActivity.this);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
