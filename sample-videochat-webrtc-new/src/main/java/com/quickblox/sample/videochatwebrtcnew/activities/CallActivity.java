@@ -349,6 +349,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             sessionUserCallback.onCallRejectByUser(session, userID, userInfo);
         }
 
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -424,7 +425,9 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                     }
 
                     Log.d(TAG, "Stop session");
-                    addOpponentsFragment();
+                    if (!(getCurrentFragment() instanceof OpponentsFragment)) {
+                        addOpponentsFragment();
+                    }
 
                     currentSession = null;
 
@@ -465,24 +468,35 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
     @Override
-    public void onReceiveHangUpFromUser(QBRTCSession session, final Integer userID) {
+    public void onReceiveHangUpFromUser(final QBRTCSession session, final Integer userID) {
         if (session.equals(getCurrentSession())) {
-
 
             if (sessionUserCallback != null) {
                 sessionUserCallback.onReceiveHangUpFromUser(session, userID);
             }
+
+
             // TODO update view of this user
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
 //                setStateTitle(userID, R.string.hungUp, View.INVISIBLE);
                     showToast(R.string.hungUp);
+                    if (userID.equals(session.getCallerID())) {
+                        if (getCurrentFragment() instanceof IncomeCallFragment) {
+                            removeIncomeCallFragment();
+                            addOpponentsFragment();
+                        }
+                    }
                 }
             });
         }
     }
 
+
+    private Fragment getCurrentFragment(){
+        return getFragmentManager().findFragmentById(R.id.fragment_container);
+    }
 
     public void addOpponentsFragment() {
         if (isInFront) {
