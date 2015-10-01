@@ -11,6 +11,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.activities.ListUsersActivity;
 import com.quickblox.users.model.QBUser;
 
@@ -22,20 +23,20 @@ import java.util.List;
  */
 public class OpponentsAdapter extends BaseAdapter {
 
-    private List<QBUser> opponents;
+    private List<User> opponents;
     private LayoutInflater inflater;
     public static int i;
-    public List<QBUser> selected = new ArrayList<>();
+    public List<User> selected = new ArrayList<>();
     private String TAG = "OpponentsAdapte";
 
-    public OpponentsAdapter(Context context, List<QBUser> users) {
+    public OpponentsAdapter(Context context, List<User> users) {
         Log.d(TAG, "On crate i:" + i);
         this.opponents = users;
         this.inflater = LayoutInflater.from(context);
 
     }
 
-    public List<QBUser> getSelected() {
+    public List<User> getSelected() {
         return selected;
     }
 
@@ -73,15 +74,15 @@ public class OpponentsAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        final QBUser user = opponents.get(position);
+        final User user = opponents.get(position);
 
 
         if (user != null) {
 
-            holder.opponentsNumber.setText(String.valueOf(ListUsersActivity.getUserIndex(user.getId())));
+            holder.opponentsNumber.setText(String.valueOf(user.getUserNumber()));
 
             holder.opponentsNumber.setBackgroundResource(ListUsersActivity.resourceSelector
-                    (ListUsersActivity.getUserIndex(user.getId())));
+                    (user.getUserNumber()));
             holder.opponentsName.setText(user.getFullName());
 
             holder.opponentsRadioButton.setOnCheckedChangeListener(null);

@@ -16,16 +16,20 @@ import com.crashlytics.android.Crashlytics;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBSession;
 import com.quickblox.chat.QBChatService;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
+import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.adapters.UsersAdapter;
 import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
+import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -43,10 +47,10 @@ public class ListUsersActivity extends Activity {
 
     private UsersAdapter usersListAdapter;
     private ListView usersList;
-    private ProgressBar loginPB;
+    private ProgressBar progressBar;
     private Context context;
     private static QBChatService chatService;
-    private static ArrayList<User> users = DataHolder.createUsersList();
+    private static ArrayList<User> users = new ArrayList<>();
     private volatile boolean resultReceived = true;
 
 
@@ -69,14 +73,36 @@ public class ListUsersActivity extends Activity {
             QBChatService.init(this);
             chatService = QBChatService.getInstance();
         }
-        initUsersList();
+        createAppSession();
 
+    }
+
+    private void createAppSession() {
+        showProgress(true);
+        QBAuth.createSession(new QBEntityCallback<QBSession>() {
+            @Override
+            public void onSuccess(QBSession qbSession, Bundle bundle) {
+                showProgress(false);
+                loadUsers();
+            }
+
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError(List<String> list) {
+                Toast.makeText(ListUsersActivity.this, "Error while loading users", Toast.LENGTH_SHORT).show();
+                showProgress(false);
+            }
+        });
     }
 
     private void initUI() {
         usersList = (ListView) findViewById(R.id.usersListView);
-        loginPB = (ProgressBar) findViewById(R.id.loginPB);
-        loginPB.setVisibility(View.INVISIBLE);
+        progressBar = (ProgressBar) findViewById(R.id.loginPB);
+        progressBar.setVisibility(View.INVISIBLE);
 
     }
 
@@ -178,8 +204,42 @@ public class ListUsersActivity extends Activity {
         usersList.setOnItemClickListener(clicklistener);
     }
 
+    private void loadUsers(){
+        showProgress(true);
+        QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
+        requestBuilder.setPerPage(15);
+        List<String> tags = new LinkedList<>();
+        tags.add(Consts.USERS_TAG);
+//            tags.add("webrtctest");
+        QBUsers.getUsersByTags(tags, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>() {
+            @Override
+            public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
+                showProgress(false);
+                users.addAll(DataHolder.createUsersList(qbUsers));
+//                    Log.d(TAG, "download users from QickBlox");
+                initUsersList();
+            }
+
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onError(List<String> strings) {
+                showProgress(false);
+                Toast.makeText(ListUsersActivity.this, "Error while loading users", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onError()");
+            }
+        });
+    }
+
+    private void showProgress(boolean show){
+        progressBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
     private long upTime = 0l;
 
+    private User currentUser;
     AdapterView.OnItemClickListener clicklistener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (!resultReceived || (SystemClock.uptimeMillis() - upTime) < ON_ITEM_CLICK_DELAY){
@@ -187,17 +247,16 @@ public class ListUsersActivity extends Activity {
             }
             resultReceived = false;
             upTime = SystemClock.uptimeMillis();
-            String login = usersListAdapter.getItem(position).getLogin();
-            String password = usersListAdapter.getItem(position).getPassword();
+            currentUser = usersListAdapter.getItem(position);
 
-            createSession(login, password);
+            createSession(currentUser.getLogin(), currentUser.getPassword());
         }
     };
 
 
     private void createSession(final String login, final String password) {
 
-        loginPB.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
 
         final QBUser user = new QBUser(login, password);
         QBAuth.createSession(login, password, new QBEntityCallbackImpl<QBSession>() {
@@ -206,8 +265,8 @@ public class ListUsersActivity extends Activity {
                 Log.d(TAG, "onSuccess create session with params");
                 user.setId(session.getUserId());
 
-                loginPB.setVisibility(View.INVISIBLE);
-
+                progressBar.setVisibility(View.INVISIBLE);
+                DataHolder.setLoggedUser(currentUser);
                 if (chatService.isLoggedIn()){
                     resultReceived = true;
                     startCallActivity(login);
@@ -231,7 +290,7 @@ public class ListUsersActivity extends Activity {
                         @Override
                         public void onError(List errors) {
                             resultReceived = true;
-                            loginPB.setVisibility(View.INVISIBLE);
+                            progressBar.setVisibility(View.INVISIBLE);
                             Toast.makeText(ListUsersActivity.this, "Error when login", Toast.LENGTH_SHORT).show();
                             for (Object error : errors) {
                                 Log.d(TAG, error.toString());
@@ -251,7 +310,7 @@ public class ListUsersActivity extends Activity {
             @Override
             public void onError(List<String> errors) {
                 resultReceived = true;
-                loginPB.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
                 Toast.makeText(ListUsersActivity.this, "Error when login, check test users login and password", Toast.LENGTH_SHORT).show();
             }
         });

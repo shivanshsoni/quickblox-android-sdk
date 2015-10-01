@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.sample.videochatwebrtcnew.ApplicationSingleton;
 import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.activities.ListUsersActivity;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
@@ -45,7 +46,7 @@ public class IncomeCallFragment extends Fragment implements Serializable, CallAc
     private ImageButton takeBtn;
 
     private ArrayList<Integer> opponents;
-    private List<QBUser> opponentsFromCall = new ArrayList<>();
+    private List<User> opponentsFromCall = new ArrayList<>();
     private QBRTCSessionDescription sessionDescription;
     private MediaPlayer ringtone;
     private Vibrator vibrator;
@@ -136,7 +137,8 @@ public class IncomeCallFragment extends Fragment implements Serializable, CallAc
 
         callerName = (TextView) view.findViewById(R.id.callerName);
         callerName.setText(getCallerName(((CallActivity) getActivity()).getCurrentSession()));
-        callerName.setBackgroundResource(ListUsersActivity.selectBackgrounForOpponent((DataHolder.getUserIndexByID((
+        callerName.setBackgroundResource(
+                ListUsersActivity.selectBackgrounForOpponent((DataHolder.getUserIndexByID((
                 ((CallActivity) getActivity()).getCurrentSession().getCallerID()))) + 1));
 
         otherIncUsers = (TextView) view.findViewById(R.id.otherIncUsers);
@@ -188,7 +190,6 @@ public class IncomeCallFragment extends Fragment implements Serializable, CallAc
 
     private String getOtherIncUsersNames(ArrayList<Integer> opponents) {
         StringBuffer s = new StringBuffer("");
-        opponentsFromCall.addAll(DataHolder.usersList);
         opponents.remove(QBChatService.getInstance().getUser().getId());
 
         for (Integer i : opponents) {
@@ -210,9 +211,9 @@ public class IncomeCallFragment extends Fragment implements Serializable, CallAc
         String s = new String();
         int i = session.getCallerID();
 
-        opponentsFromCall.addAll(DataHolder.usersList);
+        opponentsFromCall.addAll(DataHolder.getUsers());
 
-        for (QBUser usr : opponentsFromCall) {
+        for (User usr : opponentsFromCall) {
             if (usr.getId().equals(i)) {
                 s = usr.getFullName();
             }

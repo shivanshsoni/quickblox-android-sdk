@@ -28,6 +28,7 @@ import android.widget.ToggleButton;
 
 import com.quickblox.sample.videochatwebrtcnew.ApplicationSingleton;
 import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.activities.ListUsersActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsFromCallAdapter;
@@ -60,7 +61,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     public static final String START_CONVERSATION_REASON = "start_conversation_reason";
 
     private String TAG = ConversationFragment.class.getSimpleName();
-    private ArrayList<QBUser> opponents;
+    private ArrayList<User> opponents;
     private int qbConferenceType;
     private int startReason;
     private String sessionID;
@@ -90,7 +91,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     private RecyclerView recyclerView;
     private SparseArray<OpponentsFromCallAdapter.ViewHolder> opponentViewHolders;
 
-    public static ConversationFragment newInstance(List<QBUser> opponents, String callerName,
+    public static ConversationFragment newInstance(List<User> opponents, String callerName,
                         QBRTCTypes.QBConferenceType qbConferenceType,
                                                    Map<String, String> userInfo,  CallActivity.StartConversetionReason reason,
                                                    String sesionnId){
@@ -121,7 +122,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         ((CallActivity) getActivity()).initActionBarWithTimer();
 
         if (getArguments() != null) {
-            opponents = (ArrayList<QBUser>) getArguments().getSerializable(ApplicationSingleton.OPPONENTS);
+            opponents = (ArrayList<User>) getArguments().getSerializable(ApplicationSingleton.OPPONENTS);
             qbConferenceType = getArguments().getInt(ApplicationSingleton.CONFERENCE_TYPE);
             startReason = getArguments().getInt(CallActivity.START_CONVERSATION_REASON);
             sessionID = getArguments().getString(CallActivity.SESSION_ID);

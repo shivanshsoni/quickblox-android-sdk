@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.view.QBGLVideoView;
 
@@ -28,12 +29,12 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
     private final int itemWidth;
 
     private Context context;
-    private List<QBUser> opponents;
+    private List<User> opponents;
     private boolean showVideoView;
     private LayoutInflater inflater;
 
 
-    public OpponentsFromCallAdapter(Context context, List<QBUser> users, int width, int height, boolean showVideoView) {
+    public OpponentsFromCallAdapter(Context context, List<User> users, int width, int height, boolean showVideoView) {
         this.context = context;
         this.opponents = users;
         this.showVideoView = showVideoView;
@@ -63,7 +64,7 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final QBUser user = opponents.get(position);
+        final User user = opponents.get(position);
 
         holder.opponentsName.setText(user.getFullName());
         holder.setUserId(user.getId());

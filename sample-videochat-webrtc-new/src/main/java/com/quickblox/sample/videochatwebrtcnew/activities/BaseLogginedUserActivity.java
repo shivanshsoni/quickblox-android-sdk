@@ -12,7 +12,7 @@ import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class BaseLogginedUserActivity extends Activity {
 
-    private static final String VERSION_NUMBER = "0.9.4.18062015";
+    private static final String VERSION_NUMBER = "0.9.5.30092015";
     private static final String APP_VERSION = "App version";
     static android.app.ActionBar mActionBar;
     private Chronometer timerABWithTimer;
@@ -37,8 +37,11 @@ public class BaseLogginedUserActivity extends Activity {
         View mCustomView = mInflater.inflate(R.layout.actionbar_view, null);
 
         TextView numberOfListAB = (TextView) mCustomView.findViewById(R.id.numberOfListAB);
-        numberOfListAB.setBackgroundResource(ListUsersActivity.resourceSelector((Integer) searchIndexLogginedUser(DataHolder.createUsersList()) + 1));
-        numberOfListAB.setText(String.valueOf((Integer) searchIndexLogginedUser(DataHolder.createUsersList()) + 1));
+        User loggedUser = DataHolder.getLoggedUser();
+        if (loggedUser != null ) {
+            numberOfListAB.setBackgroundResource(ListUsersActivity.resourceSelector(loggedUser.getUserNumber()));
+            numberOfListAB.setText(String.valueOf(loggedUser.getUserNumber()));
+        }
 
         numberOfListAB.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -55,10 +58,9 @@ public class BaseLogginedUserActivity extends Activity {
 
 
         TextView userNameAB = (TextView) mCustomView.findViewById(R.id.userNameAB);
-        Integer index = (Integer) searchIndexLogginedUser(DataHolder.createUsersList());
 
-        if (index >= 0) {
-            userNameAB.setText(DataHolder.createUsersList().get(index).getFullName());
+        if (loggedUser != null ) {
+            userNameAB.setText(loggedUser.getFullName());
         }
 
         mActionBar.setCustomView(mCustomView);
@@ -81,22 +83,13 @@ public class BaseLogginedUserActivity extends Activity {
         loginAsABWithTimer.setText(R.string.logged_in_as);
 
         TextView userNameAB = (TextView) mCustomView.findViewById(R.id.userNameABWithTimer);
-        userNameAB.setText(DataHolder.createUsersList().get(((Integer) searchIndexLogginedUser(DataHolder.createUsersList()))).getFullName());
+        User user = DataHolder.getLoggedUser();
+        if (user != null) {
+            userNameAB.setText(user.getFullName());
+        }
 
         mActionBar.setCustomView(mCustomView);
         mActionBar.setDisplayShowCustomEnabled(true);
-    }
-
-    private static Object searchIndexLogginedUser(ArrayList<User> usersList) {
-        int indexLogginedUser = -1;
-
-        for (User usr : usersList) {
-            if (usr.getLogin().equals(CallActivity.login)) {
-                indexLogginedUser = usersList.indexOf(usr);
-                break;
-            }
-        }
-        return indexLogginedUser;
     }
 
     public void startTimer() {

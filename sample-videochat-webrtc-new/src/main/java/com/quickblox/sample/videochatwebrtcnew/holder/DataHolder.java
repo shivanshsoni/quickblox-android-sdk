@@ -11,6 +11,11 @@ public class DataHolder {
     private static final String TAG = DataHolder.class.getSimpleName();
     public static ArrayList<User> usersList;
     public static final String PASSWORD = "x6Bt0VDy5";
+    private static User currentUser;
+
+    public static User getLoggedUser() {
+        return currentUser;
+    }
 
 
     public void setUsersList(List<User> UsersList) {
@@ -67,6 +72,20 @@ public class DataHolder {
         return usersList;
     }
 
+    public static ArrayList<User> createUsersList(List<QBUser> users) {
+        usersList = new ArrayList<>();
+
+        int i = 0;
+        for (QBUser qbUser : users) {
+            usersList.add(new User(++i, qbUser.getFullName(), qbUser.getLogin(), PASSWORD, qbUser.getId()));
+        }
+
+        return usersList;
+    }
+
+    public static List<User> getUsers(){
+        return usersList;
+    }
 
     public static String getUserNameByID(Integer callerID) {
 //        Log.d(TAG, "callerID " + callerID);
@@ -90,10 +109,10 @@ public class DataHolder {
         return null;
     }
 
-    public static ArrayList<QBUser> getUsersByIDs(Integer... ids) {
-        ArrayList<QBUser> result = new ArrayList<>();
+    public static ArrayList<User> getUsersByIDs(Integer... ids) {
+        ArrayList<User> result = new ArrayList<>();
         for (Integer userId : ids) {
-            for (QBUser user : usersList) {
+            for (User user : usersList) {
                 if (userId.equals(user.getId())){
                     result.add(user);
                 }
@@ -122,5 +141,10 @@ public class DataHolder {
             }
         }
         return -1;
+    }
+
+    public static void setLoggedUser(User currentUser) {
+
+        DataHolder.currentUser = currentUser;
     }
 }

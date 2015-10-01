@@ -18,8 +18,10 @@ import com.quickblox.chat.QBChatService;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsAdapter;
+import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 import com.quickblox.sample.videochatwebrtcnew.resources.ResourceManager;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
@@ -86,48 +88,15 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
 
     private void initOpponentListAdapter() {
         final ListView opponentsList = (ListView) view.findViewById(R.id.opponentsList);
-        List<QBUser> users = ((CallActivity) getActivity()).getOpponentsList();
 
-        QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
-        requestBuilder.setPerPage(100);
+        List<User> userList = new ArrayList<>(((CallActivity) getActivity()).getOpponentsList());
+        prepareUserList(opponentsList, userList);
+        progresDialog.dismiss();
 
-        if (users == null) {
-            List<String> tags = new LinkedList<>();
-            tags.add("webrtcusers");
-//            tags.add("webrtctest");
-            QBUsers.getUsersByTags(tags, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>() {
-                @Override
-                public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
-//                    Log.d(TAG, "download users from QickBlox");
-                    ArrayList<QBUser> orderedUsers = reorderUsersByName(qbUsers);
-                    if(isAdded()) {
-                        ((CallActivity) getActivity()).setOpponentsList(orderedUsers);
-                        prepareUserList(opponentsList, orderedUsers);
-                        progresDialog.dismiss();
-                    } else {
-                        Log.e("getActivity() error", "get Activity is null, because adapter wasn't added");
-                    }
-                }
 
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onError(List<String> strings) {
-                    Log.d(TAG, "onError()");
-                }
-            });
-        } else {
-
-            ArrayList<QBUser> userList = ((CallActivity) getActivity()).getOpponentsList();
-            prepareUserList(opponentsList, userList);
-            progresDialog.dismiss();
-
-        }
     }
 
-    private void prepareUserList(ListView opponentsList, List<QBUser> users) {
+    private void prepareUserList(ListView opponentsList, List<User> users) {
         int i = searchIndexLogginedUser(users);
         if (i >= 0)
             users.remove(i);
@@ -275,7 +244,7 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
         return resultList;
     }
 
-    public static int searchIndexLogginedUser(List<QBUser> usersList) {
+    public static int searchIndexLogginedUser(List<User> usersList) {
         int indexLogginedUser = -1;
         for (QBUser usr : usersList) {
             if (usr.getLogin().equals(login)) {

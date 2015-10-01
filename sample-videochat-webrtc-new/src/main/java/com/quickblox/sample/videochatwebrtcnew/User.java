@@ -2,7 +2,9 @@ package com.quickblox.sample.videochatwebrtcnew;
 
 import com.quickblox.users.model.QBUser;
 
-public class User extends QBUser {
+import java.io.Serializable;
+
+public class User extends QBUser implements Serializable{
 
     public int userNumber;
 

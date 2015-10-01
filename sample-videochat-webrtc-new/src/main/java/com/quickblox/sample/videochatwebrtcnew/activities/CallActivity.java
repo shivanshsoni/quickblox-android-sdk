@@ -21,6 +21,7 @@ import com.quickblox.chat.QBWebRTCSignaling;
 import com.quickblox.chat.listeners.QBVideoChatSignalingManagerListener;
 import com.quickblox.sample.videochatwebrtcnew.ApplicationSingleton;
 import com.quickblox.sample.videochatwebrtcnew.R;
+import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsAdapter;
 import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.fragments.ConversationFragment;
@@ -66,9 +67,8 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
 
     private QBRTCSession currentSession;
-    public static String login;
-    public static ArrayList<QBUser> opponentsList;
-
+    public  static String login;
+    public  List<User> opponentsList;
     private Runnable showIncomingCallWindowTask;
     private Handler showIncomingCallWindowTaskHandler;
     private BroadcastReceiver wifiStateReceiver;
@@ -84,7 +84,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        opponentsList= DataHolder.getUsers();;
 
         Log.d(TAG, "Activity. Thread id: " + Thread.currentThread().getId());
 
@@ -531,14 +531,14 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
 
-    public void addConversationFragmentStartCall(List<QBUser> opponents,
+    public void addConversationFragmentStartCall(List<User> opponents,
                                                  QBRTCTypes.QBConferenceType qbConferenceType,
                                                  Map<String, String> userInfo) {
         QBRTCSession newSessionWithOpponents = rtcClient.createNewSessionWithOpponents(
                 getOpponentsIds(opponents), qbConferenceType);
         Log.d("Crash", "addConversationFragmentStartCall. Set session " + newSessionWithOpponents);
         setCurrentSession(newSessionWithOpponents);
-
+        getCurrentSession().addSessionCallbacksListener(this);
         ConversationFragment fragment = ConversationFragment.newInstance(opponents, opponents.get(0).getFullName(),
                 qbConferenceType, userInfo,
                 StartConversetionReason.OUTCOME_CALL_MADE, getCurrentSession().getSessionID());
@@ -547,7 +547,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
 
-    public static ArrayList<Integer> getOpponentsIds(List<QBUser> opponents) {
+    public static ArrayList<Integer> getOpponentsIds(List<User> opponents) {
         ArrayList<Integer> ids = new ArrayList<Integer>();
         for (QBUser user : opponents) {
             ids.add(user.getId());
@@ -566,7 +566,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             opponentsWithoutMe.remove(new Integer(myId));
             opponentsWithoutMe.add(session.getCallerID());
 
-            ArrayList<QBUser> opponents = DataHolder.getUsersByIDs(opponentsWithoutMe.toArray(new Integer[opponentsWithoutMe.size()]));
+            ArrayList<User> opponents = DataHolder.getUsersByIDs(opponentsWithoutMe.toArray(new Integer[opponentsWithoutMe.size()]));
             ConversationFragment fragment = ConversationFragment.newInstance(opponents,
                     DataHolder.getUserNameByID(session.getCallerID()),
                     session.getConferenceType(), session.getUserInfo(),
@@ -577,16 +577,18 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
 
-    public void setOpponentsList(ArrayList<QBUser> qbUsers) {
+    public void setOpponentsList(List<User> qbUsers) {
         this.opponentsList = qbUsers;
     }
 
-    public ArrayList<QBUser> getOpponentsList() {
+    public List<User> getOpponentsList() {
         return opponentsList;
     }
 
     public void addVideoTrackCallbacksListener(QBRTCClientVideoTracksCallbacks videoTracksCallbacks) {
-        rtcClient.addVideoTrackCallbacksListener(videoTracksCallbacks);
+        if (currentSession != null){
+            currentSession.addVideoTrackCallbacksListener(videoTracksCallbacks);
+        }
     }
 
     public void addTCClientConnectionCallback(QBRTCSessionConnectionCallbacks clientConnectionCallbacks) {

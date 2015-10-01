@@ -6,11 +6,9 @@ public class Consts {
     public static final String AUTH_SECRET = "BTFsj7Rtt27DAmT";
     public static final String EMPTY_STRING = "";
 
+    public static final String USERS_TAG = "QAusers";
+
     public static final int CALL_ACTIVITY_CLOSE = 1000;
-
-
-
-
 
     //CALL ACTIVITY CLOSE REASONS
     public static final int CALL_ACTIVITY_CLOSE_WIFI_DISABLED = 1001;
