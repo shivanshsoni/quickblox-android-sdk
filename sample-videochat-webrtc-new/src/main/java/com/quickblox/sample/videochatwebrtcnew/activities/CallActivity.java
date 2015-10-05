@@ -78,13 +78,14 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     private boolean isInFront;
     private QBRTCClient rtcClient;
     private QBRTCSessionUserCallback sessionUserCallback;
+    private boolean wifiEnabled = true;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        opponentsList= DataHolder.getUsers();;
+        opponentsList= DataHolder.getUsers();
 
         Log.d(TAG, "Activity. Thread id: " + Thread.currentThread().getId());
 
@@ -145,29 +146,9 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     private void processCurrentWifiState(Context context) {
         WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (!wifi.isWifiEnabled()) {
-//            isLastConnectionStateEnabled = false;
-            Log.d(TAG, "WIFI is turned off");
-            if (closeByWifiStateAllow) {
-                if (currentSession != null) {
-                    Log.d(TAG, "currentSession NOT null");
-                    // Close session safely
-                    disableConversationFragmentButtons();
-                    stopConversationFragmentBeeps();
-
-                    hangUpCurrentSession();
-
-                    hangUpReason = Consts.WIFI_DISABLED;
-                } else {
-                    Log.d(TAG, "Call finish() on activity");
-                    finish();
-                }
-            } else {
-                Log.d(TAG, "WIFI is turned on");
-                showToast(R.string.NETWORK_ABSENT);
-            }
-        } else {
-//            isLastConnectionStateEnabled = true;
+        if (wifiEnabled != wifi.isWifiEnabled()) {
+            wifiEnabled = wifi.isWifiEnabled();
+            showToast("Wifi " + (wifiEnabled ? "enabled" : "disabled"));
         }
     }
 
@@ -433,7 +414,6 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
                     stopTimer();
                     closeByWifiStateAllow = true;
-                    processCurrentWifiState(CallActivity.this);
                 }
             }
         });
@@ -463,6 +443,15 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             @Override
             public void run() {
                 Toast.makeText(CallActivity.this, getString(message), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void showToast(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(CallActivity.this, message, Toast.LENGTH_LONG).show();
             }
         });
     }

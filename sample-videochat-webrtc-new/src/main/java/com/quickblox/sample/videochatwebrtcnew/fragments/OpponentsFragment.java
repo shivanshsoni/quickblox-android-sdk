@@ -15,15 +15,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.quickblox.chat.QBChatService;
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
 import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsAdapter;
-import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
-import com.quickblox.sample.videochatwebrtcnew.resources.ResourceManager;
-import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCClient;
 import com.quickblox.videochat.webrtc.QBRTCConfig;
@@ -54,7 +49,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
     private View view=null;
     private ProgressDialog progresDialog;
     private ListView opponentsList;
-    private ResourceManager resourceManager;
 
 
     public static OpponentsFragment getInstance() {
@@ -170,12 +164,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
                     .addConversationFragmentStartCall(opponentsAdapter.getSelected(),
                             qbConferenceType, userInfo);
 
-    }
-
-    private void createResourceManager(){
-        if (resourceManager == null) {
-            resourceManager = new ResourceManager();
-        }
     }
 
     public static ArrayList<Integer> getOpponentsIds(List<QBUser> opponents){
