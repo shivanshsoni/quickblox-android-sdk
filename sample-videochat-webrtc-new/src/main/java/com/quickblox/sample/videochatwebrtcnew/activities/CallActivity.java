@@ -7,11 +7,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,6 +29,7 @@ import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.fragments.ConversationFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.IncomeCallFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.OpponentsFragment;
+import com.quickblox.sample.videochatwebrtcnew.fragments.SettingsFragment;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCClient;
@@ -79,6 +82,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     private QBRTCClient rtcClient;
     private QBRTCSessionUserCallback sessionUserCallback;
     private boolean wifiEnabled = true;
+    private SharedPreferences sharedPref;
 
 
     @Override
@@ -96,6 +100,8 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             addOpponentsFragment();
         }
 
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         initQBRTCClient();
         initWiFiManagerListener();
     }
@@ -598,6 +604,14 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     public void removeRTCSessionUserCallback(QBRTCSessionUserCallback sessionUserCallback) {
         this.sessionUserCallback = null;
+    }
+
+    public void showSettings() {
+       SettingsActivity.start(this);
+    }
+
+    public SharedPreferences getDefaultSharedPrefs() {
+        return sharedPref;
     }
 
     public static enum StartConversetionReason {

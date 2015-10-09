@@ -2,7 +2,9 @@ package com.quickblox.sample.videochatwebrtcnew.fragments;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,6 +24,7 @@ import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsAdapter;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCClient;
 import com.quickblox.videochat.webrtc.QBRTCConfig;
+import com.quickblox.videochat.webrtc.QBRTCMediaConfig;
 import com.quickblox.videochat.webrtc.QBRTCTypes;
 
 import org.jivesoftware.smack.SmackException;
@@ -76,6 +79,7 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
         progresDialog.show();
 
         initOpponentListAdapter();
+        // Get setting keys.
 //         Log.d(TAG, "onCreateView() from OpponentsFragment Level 2");
         return view;
     }
@@ -156,6 +160,8 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
                     break;*/
             }
 
+            defineRTCMediaSettings();
+
             Map<String, String> userInfo = new HashMap<>();
             userInfo.put("any_custom_data", "some data");
             userInfo.put("my_avatar_url", "avatar_reference");
@@ -164,6 +170,73 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
                     .addConversationFragmentStartCall(opponentsAdapter.getSelected(),
                             qbConferenceType, userInfo);
 
+    }
+
+    private void defineRTCMediaSettings() {
+        SharedPreferences sharedPref = ((CallActivity)getActivity()).getDefaultSharedPrefs();
+
+        // Check HW codec flag.
+        boolean hwCodec = sharedPref.getBoolean(getString(R.string.pref_hwcodec_key),
+                Boolean.valueOf(getString(R.string.pref_hwcodec_default)));
+
+        QBRTCMediaConfig.setVideoHWAcceleration(hwCodec);
+        // Get video resolution from settings.
+        int resolutionItem = Integer.parseInt(sharedPref.getString(getString(R.string.pref_resolution_key),
+                "0"));
+        Log.e(TAG, "resolutionItem =: " + resolutionItem);
+        for (QBRTCMediaConfig.QBRTCSessionVideoQuality quality : QBRTCMediaConfig.QBRTCSessionVideoQuality.values()){
+            if (quality.ordinal() == resolutionItem){
+                Log.e(TAG, "resolution =: " + quality.height + ":"+quality.width);
+                QBRTCMediaConfig.setVideoHeight(quality.height);
+                QBRTCMediaConfig.setVideoWidth(quality.width);
+                break;
+            }
+        }
+
+        // Get camera fps from settings.
+        int fps = Integer.parseInt(sharedPref.getString(getString(R.string.pref_fps_key),
+                "0"));
+        Log.e(TAG, "cameraFps =: " + fps);
+        QBRTCMediaConfig.setVideoFps(fps);
+
+        // Get start bitrate.
+        String bitrateTypeDefault = getString(R.string.pref_startbitrate_default);
+        String bitrateType = sharedPref.getString(
+                getString(R.string.pref_startbitrate_key), bitrateTypeDefault);
+        if (!bitrateType.equals(bitrateTypeDefault)) {
+            String bitrateValue = sharedPref.getString(getString(R.string.pref_startbitratevalue_key),
+                    getString(R.string.pref_startbitratevalue_default));
+            int startBitrate = Integer.parseInt(bitrateValue);
+            QBRTCMediaConfig.setVideoStartBitrate(startBitrate);
+        }
+
+        int videoCodecItem = Integer.parseInt(getPreferenceString(sharedPref, R.string.pref_videocodec_key, "0"));
+        for (QBRTCMediaConfig.VideoCodec codec : QBRTCMediaConfig.VideoCodec.values()){
+            if (codec.ordinal() == videoCodecItem){
+                Log.e(TAG, "videoCodecItem =: " + codec.getDescription());
+                QBRTCMediaConfig.setVideoCodec(codec);
+                break;
+            }
+        }
+
+        String audioCodecDescription = getPreferenceString(sharedPref, R.string.pref_audiocodec_key,
+                R.string.pref_audiocodec_def);
+        QBRTCMediaConfig.AudioCodec audioCodec = QBRTCMediaConfig.AudioCodec.ISAC.getDescription()
+                .equals(audioCodecDescription) ?
+                    QBRTCMediaConfig.AudioCodec.ISAC : QBRTCMediaConfig.AudioCodec.OPUS;
+        Log.e(TAG, "audioCodec =: " + audioCodec.getDescription());
+        QBRTCMediaConfig.setAudioCodec(audioCodec);
+
+    }
+
+    private String getPreferenceString(SharedPreferences sharedPref , int StrRes, int StrResDefValue){
+        return sharedPref.getString(getString(StrRes),
+                getString(StrResDefValue));
+    }
+
+    private String getPreferenceString(SharedPreferences sharedPref , int StrRes, String defValue){
+        return sharedPref.getString(getString(StrRes),
+                defValue);
     }
 
     public static ArrayList<Integer> getOpponentsIds(List<QBUser> opponents){
@@ -206,6 +279,8 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
                 }
                 getActivity().finish();
                 return true;
+            case R.id.settings:
+                ((CallActivity)getActivity()).showSettings();
             default:
                 return super.onOptionsItemSelected(item);
         }
