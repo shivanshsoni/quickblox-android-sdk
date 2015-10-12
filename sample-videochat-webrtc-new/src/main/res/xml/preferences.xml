@@ -61,10 +61,4 @@
         android:defaultValue="@string/pref_cpu_usage_detection_default" />
 
 
-
-    <!--<CheckBoxPreference
-        android:key="@string/pref_displayhud_key"
-        android:title="@string/pref_displayhud_title"
-        android:dialogTitle="@string/pref_displayhud_dlg"
-        android:defaultValue="@string/pref_displayhud_default" />-->
 </PreferenceScreen>

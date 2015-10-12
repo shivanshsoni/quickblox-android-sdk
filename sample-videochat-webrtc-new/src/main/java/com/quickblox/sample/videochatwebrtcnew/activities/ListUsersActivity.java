@@ -215,6 +215,7 @@ public class ListUsersActivity extends Activity {
             @Override
             public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
                 showProgress(false);
+                users.clear();
                 users.addAll(DataHolder.createUsersList(qbUsers));
 //                    Log.d(TAG, "download users from QickBlox");
                 initUsersList();

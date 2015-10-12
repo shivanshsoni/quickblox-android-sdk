@@ -31,6 +31,7 @@ import com.quickblox.sample.videochatwebrtcnew.fragments.IncomeCallFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.OpponentsFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.SettingsFragment;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
+import com.quickblox.sample.videochatwebrtcnew.util.SettingsUtil;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCClient;
 import com.quickblox.videochat.webrtc.QBRTCConfig;
@@ -275,7 +276,6 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
                 if (getCurrentSession() == null) {
                     Log.d(TAG, "Start new session");
-
                     setCurrentSession(session);
                     session.addSessionCallbacksListener(CallActivity.this);
                     addIncomeCallFragment(session);
@@ -531,6 +531,9 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                                                  Map<String, String> userInfo) {
         QBRTCSession newSessionWithOpponents = rtcClient.createNewSessionWithOpponents(
                 getOpponentsIds(opponents), qbConferenceType);
+        SettingsUtil.setSettingsStrategy(opponents,
+                getDefaultSharedPrefs(),
+                this);
         Log.d("Crash", "addConversationFragmentStartCall. Set session " + newSessionWithOpponents);
         setCurrentSession(newSessionWithOpponents);
         getCurrentSession().addSessionCallbacksListener(this);
@@ -562,6 +565,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             opponentsWithoutMe.add(session.getCallerID());
 
             ArrayList<User> opponents = DataHolder.getUsersByIDs(opponentsWithoutMe.toArray(new Integer[opponentsWithoutMe.size()]));
+            SettingsUtil.setSettingsStrategy(opponents, getDefaultSharedPrefs(), this);
             ConversationFragment fragment = ConversationFragment.newInstance(opponents,
                     DataHolder.getUserNameByID(session.getCallerID()),
                     session.getConferenceType(), session.getUserInfo(),
