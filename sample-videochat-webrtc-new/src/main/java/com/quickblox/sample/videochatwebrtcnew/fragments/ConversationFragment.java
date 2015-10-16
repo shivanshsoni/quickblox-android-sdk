@@ -59,6 +59,8 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     public static final String CALLER_NAME = "caller_name";
     public static final String SESSION_ID = "sessionID";
     public static final String START_CONVERSATION_REASON = "start_conversation_reason";
+    private static final int DEFAULT_ROWS_COUNT = 2;
+    private static final int DEFAULT_COLS_COUNT = 3;
 
     private String TAG = ConversationFragment.class.getSimpleName();
     private ArrayList<User> opponents;
@@ -237,13 +239,15 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         recyclerView = (RecyclerView) view.findViewById(R.id.grid_opponents);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), R.dimen.grid_item_divider));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        final int columnsCount = defineColumnsCount();
+        final int rowsCount = defineRowCount();
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), columnsCount));
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 Log.i(TAG, "onGlobalLayout");
-                recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, recyclerView.getMeasuredWidth() / 3,
-                        recyclerView.getMeasuredHeight() / 2,
+                recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, recyclerView.getMeasuredWidth() / columnsCount,
+                        recyclerView.getMeasuredHeight() / rowsCount,
                         QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO.getValue() == qbConferenceType));
                 recyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
@@ -270,6 +274,27 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         imgMyCameraOff = (ImageView) view.findViewById(R.id.imgMyCameraOff);
 
         actionButtonsEnabled(false);
+    }
+
+    private int defineRowCount() {
+        int result = DEFAULT_ROWS_COUNT;
+        int opponentsCount = opponents.size();
+        if (opponentsCount < 3) {
+            result = opponentsCount;
+        }
+        return result;
+
+    }
+
+    private int defineColumnsCount() {
+        int result = DEFAULT_COLS_COUNT;
+        int opponentsCount = opponents.size();
+        if (opponentsCount == 1 || opponentsCount == 2) {
+            result = 1;
+        } else if (opponentsCount == 4){
+            result = 2;
+        }
+        return result;
     }
 
     @Override

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="videoResolutions">
+        <item>Default</item>
         <item>HD (1280 x 720)</item>
         <item>VGA (640 x 480)</item>
         <item>QVGA (320 x 240)</item>
-        <item>Default</item>
     </string-array>
 
     <string-array name="videoResolutionsValues">
+        <item>-1</item>
         <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 
     <string-array name="cameraFpsValues">

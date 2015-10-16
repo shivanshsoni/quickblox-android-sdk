@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class BaseLogginedUserActivity extends Activity {
 
-    private static final String VERSION_NUMBER = "0.9.6.05102015";
+    private static final String VERSION_NUMBER = "1.0.1.10132015";
     private static final String APP_VERSION = "App version";
     static android.app.ActionBar mActionBar;
     private Chronometer timerABWithTimer;

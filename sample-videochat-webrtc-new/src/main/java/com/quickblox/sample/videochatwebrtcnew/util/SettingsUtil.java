@@ -52,12 +52,14 @@ public class SettingsUtil {
         int resolutionItem = Integer.parseInt(sharedPref.getString(context.getString(R.string.pref_resolution_key),
                 "0"));
         Log.e(TAG, "resolutionItem =: " + resolutionItem);
-        for (QBRTCMediaConfig.VideoQuality quality : QBRTCMediaConfig.VideoQuality.values()){
-            if (quality.ordinal() == resolutionItem){
-                Log.e(TAG, "resolution =: " + quality.height + ":"+quality.width);
-                QBRTCMediaConfig.setVideoHeight(quality.height);
-                QBRTCMediaConfig.setVideoWidth(quality.width);
-                break;
+        if (resolutionItem != -1) {
+            for (QBRTCMediaConfig.VideoQuality quality : QBRTCMediaConfig.VideoQuality.values()) {
+                if (quality.ordinal() == resolutionItem) {
+                    Log.e(TAG, "resolution =: " + quality.height + ":" + quality.width);
+                    QBRTCMediaConfig.setVideoHeight(quality.height);
+                    QBRTCMediaConfig.setVideoWidth(quality.width);
+                    break;
+                }
             }
         }
 

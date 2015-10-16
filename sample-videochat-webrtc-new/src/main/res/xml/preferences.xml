@@ -29,6 +29,7 @@
         android:key="@string/pref_startbitratevalue_key"
         android:title="@string/pref_startbitratevalue_title"
         android:inputType="number"
+        android:maxLength="4"
         android:defaultValue="@string/pref_startbitratevalue_default"
         android:dialogTitle="@string/pref_startbitratevalue_dlg" />
 
