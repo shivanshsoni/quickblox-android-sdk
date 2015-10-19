@@ -6,11 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
-import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.view.QBGLVideoView;
 
 import java.util.List;
@@ -27,21 +27,36 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
     private static final String TAG = OpponentsFromCallAdapter.class.getSimpleName();
     private final int itemHeight;
     private final int itemWidth;
+    private int paddingLeft = 0;
 
     private Context context;
     private List<User> opponents;
+    private int gridWidth;
     private boolean showVideoView;
     private LayoutInflater inflater;
+    private int columns;
 
 
-    public OpponentsFromCallAdapter(Context context, List<User> users, int width, int height, boolean showVideoView) {
+    public OpponentsFromCallAdapter(Context context, List<User> users, int width, int height,
+                                    int gridWidth, int columns, int itemMargin,
+                                    boolean showVideoView) {
         this.context = context;
         this.opponents = users;
+        this.gridWidth = gridWidth;
+        this.columns = columns;
         this.showVideoView = showVideoView;
         this.inflater = LayoutInflater.from(context);
         itemWidth = width;
         itemHeight = height;
+        setPadding(itemMargin);
         Log.d(TAG, "item width=" + itemWidth + ", item height=" + itemHeight);
+    }
+
+    private void setPadding(int itemMargin){
+        int allCellWidth = (itemWidth +(itemMargin*2)) * columns;
+        if ((allCellWidth < gridWidth) && ((gridWidth - allCellWidth) > (itemMargin *2)  )){ //set padding if it makes sense to do it
+            paddingLeft = (gridWidth - allCellWidth) /2;
+        }
     }
 
     @Override
@@ -56,7 +71,10 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = inflater.inflate(R.layout.list_item_opponent_from_call, null);
-        v.setLayoutParams(new RecyclerView.LayoutParams(itemWidth, itemHeight));
+        v.findViewById(R.id.innerLayout).setLayoutParams(new FrameLayout.LayoutParams(itemWidth, itemHeight));
+        if (paddingLeft != 0) {
+            v.setPadding(paddingLeft, v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom());
+        }
         ViewHolder vh = new ViewHolder(v);
         vh.showOpponentView(showVideoView);
         return vh;

@@ -23,6 +23,7 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -246,8 +247,13 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             @Override
             public void onGlobalLayout() {
                 Log.i(TAG, "onGlobalLayout");
-                recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, recyclerView.getMeasuredWidth() / columnsCount,
-                        recyclerView.getMeasuredHeight() / rowsCount,
+                int gridWidth = recyclerView.getMeasuredWidth();
+                float itemMargin = getResources().getDimension(R.dimen.grid_item_divider);
+                int cellSize = defineMinSize(gridWidth, recyclerView.getMeasuredHeight(),
+                        columnsCount, rowsCount, itemMargin);
+                Log.i(TAG, "onGlobalLayout : cellSize="+cellSize);
+                recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, cellSize,
+                        cellSize, gridWidth, columnsCount, (int) itemMargin,
                         QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO.getValue() == qbConferenceType));
                 recyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
@@ -274,6 +280,12 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         imgMyCameraOff = (ImageView) view.findViewById(R.id.imgMyCameraOff);
 
         actionButtonsEnabled(false);
+    }
+
+    private int defineMinSize(int measuredWidth, int measuredHeight, int columnsCount, int rowsCount, float padding) {
+        int cellWidth = measuredWidth/columnsCount - (int)(padding * 2);
+        int cellHeight = measuredHeight/rowsCount - (int)(padding * 2);
+        return Math.min(cellWidth, cellHeight);
     }
 
     private int defineRowCount() {
@@ -595,7 +607,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         private int space;
 
         public DividerItemDecoration(@NonNull Context context, @DimenRes int dimensionDivider){
-            this.space = context.getResources().getDimensionPixelSize(dimensionDivider);;
+            this.space = context.getResources().getDimensionPixelSize(dimensionDivider);
         }
 
         @Override

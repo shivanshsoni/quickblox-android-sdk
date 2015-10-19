@@ -16,14 +16,16 @@
 
     <string-array name="cameraFpsValues">
         <item>0</item>
-        <item>30</item>
         <item>15</item>
+        <item>20</item>
+        <item>30</item>
     </string-array>
 
     <string-array name="cameraFps">
         <item>Default</item>
-        <item>30 fps</item>
         <item>15 fps</item>
+        <item>20 fps</item>
+        <item>30 fps</item>
     </string-array>
 
     <string-array name="startBitrate">

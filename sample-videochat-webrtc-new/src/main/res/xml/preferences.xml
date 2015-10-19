@@ -55,11 +55,5 @@
         android:dialogTitle="@string/pref_hwcodec_dlg"
         android:defaultValue="@string/pref_hwcodec_default" />
 
-    <CheckBoxPreference
-        android:key="@string/pref_cpu_usage_detection_key"
-        android:title="@string/pref_cpu_usage_detection_title"
-        android:dialogTitle="@string/pref_cpu_usage_detection_dlg"
-        android:defaultValue="@string/pref_cpu_usage_detection_default" />
-
 
 </PreferenceScreen>
