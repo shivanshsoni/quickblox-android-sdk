@@ -121,8 +121,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
 
         btnAudioCall.setOnClickListener(this);
         btnVideoCall.setOnClickListener(this);
-        /*view.findViewById(R.id.crtChnnal).setOnClickListener(this);
-        view.findViewById(R.id.closeChnnal).setOnClickListener(this);*/
 
         opponentsList = (ListView) view.findViewById(R.id.opponentsList);
     }
@@ -152,11 +150,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
                     qbConferenceType = QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO;
 
                     break;
-                /*case R.id.crtChnnal:
-
-                    break;
-                case R.id.closeChnnal:
-                    break;*/
             }
 
         Map<String, String> userInfo = new HashMap<>();
@@ -169,22 +162,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
 
     }
 
-    private void showCapturingFragmnent() {
-
-    }
-
-    public static ArrayList<Integer> getOpponentsIds(List<QBUser> opponents){
-        ArrayList<Integer> ids = new ArrayList<Integer>();
-        for(QBUser user : opponents){
-            ids.add(user.getId());
-        }
-        return ids;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
 
     @Override
     public void onPause() {
@@ -218,27 +195,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private ArrayList<QBUser> reorderUsersByName(ArrayList<QBUser> qbUsers) {
-        // Make clone collection to avoid modify input param qbUsers
-        ArrayList<QBUser> resultList = new ArrayList<>(qbUsers.size());
-        resultList.addAll(qbUsers);
-
-        // Rearrange list by user IDs
-        Collections.sort(resultList, new Comparator<QBUser>() {
-            @Override
-            public int compare(QBUser firstUsr, QBUser secondUsr) {
-                if (firstUsr.getId().equals(secondUsr.getId())) {
-                    return 0;
-                } else if (firstUsr.getId() < secondUsr.getId()) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }
-        });
-        return resultList;
     }
 
     public static int searchIndexLogginedUser(List<User> usersList) {
