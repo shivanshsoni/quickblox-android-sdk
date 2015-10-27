@@ -58,8 +58,7 @@
     <color name="white_transparent_80">#80FFFFFF</color>
 
     <!-- Settings strings. -->
-    <string name="pref_room_key">room_preference</string>
-    <string name="pref_room_list_key">room_list_preference</string>
+    <string name="pref_default_value">Default</string>
 
     <string name="pref_resolution_key">resolution_preference</string>
     <string name="pref_resolution_title">Video resolution.</string>
@@ -108,5 +107,7 @@
     <string name="pref_audiocodec_title">Default audio codec</string>
     <string name="pref_audiocodec_def">ISAC</string>
     <string name="pref_audiocodec_dlg">Select default audio codec</string>
+    <string name="btn_screen_capture">screenShot</string>
+    <string name="accepted">Accepted</string>
 
 </resources>

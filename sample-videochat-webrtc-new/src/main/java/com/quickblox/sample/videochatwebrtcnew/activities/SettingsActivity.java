@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
@@ -59,16 +60,25 @@ public class SettingsActivity extends Activity implements SharedPreferences.OnSh
         if (key.equals(bitrateStringKey)) {
             String bitrateValue = sharedPreferences.getString(bitrateStringKey,
                     getString(R.string.pref_startbitratevalue_default));
+            if (TextUtils.isEmpty(bitrateValue)){
+                Toast.makeText(this, "Value can't be empty:", Toast.LENGTH_LONG).show();
+                setDefaultstartingBitrate(sharedPreferences);
+                return;
+            }
             int startBitrate = Integer.parseInt(bitrateValue);
             if (startBitrate > MAX_VIDEO_START_BITRATE){
                 Toast.makeText(this, "Max value is:"+MAX_VIDEO_START_BITRATE, Toast.LENGTH_LONG).show();
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(bitrateStringKey,
-                        getString(R.string.pref_startbitratevalue_default));
-                editor.apply();
-                updateSummary(sharedPreferences, bitrateStringKey);
+                setDefaultstartingBitrate(sharedPreferences);
             }
         }
+    }
+
+    private void setDefaultstartingBitrate(SharedPreferences sharedPreferences){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(bitrateStringKey,
+                getString(R.string.pref_startbitratevalue_default));
+        editor.apply();
+        updateSummary(sharedPreferences, bitrateStringKey);
     }
 
     private void updateSummary(SharedPreferences sharedPreferences, String key) {

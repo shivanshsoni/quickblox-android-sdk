@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RTCGlView">
+        <attr name="mainMirror" format="boolean" />
+        <attr name="secondMirror" format="boolean" />
+        <attr name="firstCoords" format="reference" />
+        <attr name="secondCoords" format="reference"/>
+        <attr name="viewType" format="enum">
+            <enum name="local" value="0" />
+            <enum name="remote" value="1" />
+            <enum name="both" value="2" />
+        </attr>
+    </declare-styleable>
+</resources>

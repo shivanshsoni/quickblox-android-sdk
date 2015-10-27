@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Created by tereha on 16.02.15.
  */
-public class IncomeCallFragment extends Fragment implements Serializable, CallActivity.QBRTCSessionUserCallback {
+public class IncomeCallFragment extends Fragment implements Serializable{
 
     private static final String TAG = IncomeCallFragment.class.getSimpleName();
     private static final java.lang.String INCOME_WINDOW_SHOW = "WINDOW_SHOW_TMER'";
@@ -237,32 +237,4 @@ public class IncomeCallFragment extends Fragment implements Serializable, CallAc
         Log.d(TAG, "onDestroy() from IncomeCallFragment");
     }
 
-    @Override
-    public void onUserNotAnswer(QBRTCSession session, Integer userId) {
-
-    }
-
-    @Override
-    public void onCallRejectByUser(final QBRTCSession session,final Integer userId, Map<String, String> userInfo) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (userId.equals(session.getCallerID())) {
-                    enableButtons(false);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onReceiveHangUpFromUser(final QBRTCSession session,final Integer userId) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (userId.equals(session.getCallerID())) {
-                    enableButtons(false);
-                }
-            }
-        });
-    }
 }

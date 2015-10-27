@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
+import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 
 import java.util.List;
@@ -20,7 +21,6 @@ import java.util.List;
  */
 public class BaseLogginedUserActivity extends Activity {
 
-    private static final String VERSION_NUMBER = "1.0.1.10132015";
     private static final String APP_VERSION = "App version";
     static android.app.ActionBar mActionBar;
     private Chronometer timerABWithTimer;
@@ -48,7 +48,7 @@ public class BaseLogginedUserActivity extends Activity {
             public boolean onLongClick(View v) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(BaseLogginedUserActivity.this);
                 dialog.setTitle(APP_VERSION);
-                dialog.setMessage(VERSION_NUMBER);
+                dialog.setMessage(Consts.VERSION_NUMBER);
                 dialog.show();
                 return true;
             }});

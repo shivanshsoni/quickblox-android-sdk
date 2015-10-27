@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
+import com.quickblox.sample.videochatwebrtcnew.camera.CameraHelper;
+import com.quickblox.sample.videochatwebrtcnew.sharing.CaptureFormat;
 import com.quickblox.videochat.webrtc.QBRTCMediaConfig;
 
 import java.util.List;
@@ -15,10 +17,10 @@ public class SettingsUtil {
 
     private static final String TAG = SettingsUtil.class.getSimpleName();
 
-    private static void setSettingsForMultiCall(List<User> users){
+    private static void setSettingsForMultiCall(List<User> users) {
         if (users.size() <= 2) {
             int width = QBRTCMediaConfig.getVideoWidth();
-            if (width > QBRTCMediaConfig.VideoQuality.VGA_VIDEO.width){
+            if (width > QBRTCMediaConfig.VideoQuality.VGA_VIDEO.width) {
                 QBRTCMediaConfig.setVideoWidth(QBRTCMediaConfig.VideoQuality.VGA_VIDEO.width);
                 QBRTCMediaConfig.setVideoHeight(QBRTCMediaConfig.VideoQuality.VGA_VIDEO.height);
             }
@@ -32,8 +34,8 @@ public class SettingsUtil {
         }
     }
 
-    public static void setSettingsStrategy(List<User> users, SharedPreferences sharedPref, Context context){
-        if (users.size() == 1){
+    public static void setSettingsStrategy(List<User> users, SharedPreferences sharedPref, Context context) {
+        if (users.size() == 1) {
             setSettingsFromPreferences(sharedPref, context);
         } else {
             setSettingsForMultiCall(users);
@@ -52,16 +54,7 @@ public class SettingsUtil {
         int resolutionItem = Integer.parseInt(sharedPref.getString(context.getString(R.string.pref_resolution_key),
                 "0"));
         Log.e(TAG, "resolutionItem =: " + resolutionItem);
-        if (resolutionItem != -1) {
-            for (QBRTCMediaConfig.VideoQuality quality : QBRTCMediaConfig.VideoQuality.values()) {
-                if (quality.ordinal() == resolutionItem) {
-                    Log.e(TAG, "resolution =: " + quality.height + ":" + quality.width);
-                    QBRTCMediaConfig.setVideoHeight(quality.height);
-                    QBRTCMediaConfig.setVideoWidth(quality.width);
-                    break;
-                }
-            }
-        }
+        setVideoQuality(resolutionItem);
 
         // Get camera fps from settings.
         int fps = Integer.parseInt(sharedPref.getString(context.getString(R.string.pref_fps_key),
@@ -80,16 +73,16 @@ public class SettingsUtil {
             QBRTCMediaConfig.setVideoStartBitrate(startBitrate);
         }
 
-        int videoCodecItem = Integer.parseInt(getPreferenceString(sharedPref, context,  R.string.pref_videocodec_key, "0"));
-        for (QBRTCMediaConfig.VideoCodec codec : QBRTCMediaConfig.VideoCodec.values()){
-            if (codec.ordinal() == videoCodecItem){
+        int videoCodecItem = Integer.parseInt(getPreferenceString(sharedPref, context, R.string.pref_videocodec_key, "0"));
+        for (QBRTCMediaConfig.VideoCodec codec : QBRTCMediaConfig.VideoCodec.values()) {
+            if (codec.ordinal() == videoCodecItem) {
                 Log.e(TAG, "videoCodecItem =: " + codec.getDescription());
                 QBRTCMediaConfig.setVideoCodec(codec);
                 break;
             }
         }
 
-        String audioCodecDescription = getPreferenceString(sharedPref, context,  R.string.pref_audiocodec_key,
+        String audioCodecDescription = getPreferenceString(sharedPref, context, R.string.pref_audiocodec_key,
                 R.string.pref_audiocodec_def);
         QBRTCMediaConfig.AudioCodec audioCodec = QBRTCMediaConfig.AudioCodec.ISAC.getDescription()
                 .equals(audioCodecDescription) ?
@@ -99,12 +92,47 @@ public class SettingsUtil {
 
     }
 
-    private static String getPreferenceString(SharedPreferences sharedPref ,Context context,  int StrRes, int StrResDefValue){
+    private static void setVideoQuality(int resolutionItem) {
+        if (resolutionItem != -1) {
+            setVideoFromCameraFormats(resolutionItem);
+        }
+    }
+
+    private static void setVideoFromLibraryPreferences(int resolutionItem){
+        for (QBRTCMediaConfig.VideoQuality quality : QBRTCMediaConfig.VideoQuality.values()) {
+            if (quality.ordinal() == resolutionItem) {
+                Log.e(TAG, "resolution =: " + quality.height + ":" + quality.width);
+                QBRTCMediaConfig.setVideoHeight(quality.height);
+                QBRTCMediaConfig.setVideoWidth(quality.width);
+
+            }
+        }
+    }
+
+
+    private static boolean setVideoFromCameraFormats(int resolutionItem) {
+        int frontCameraId = CameraHelper.getIdOfFrontFacingDevice();
+        if (frontCameraId == -1) {
+            return false;
+        }
+        List<CaptureFormat> supportedFormats = CameraHelper.getSupportedFormats(frontCameraId);
+        if (supportedFormats == null || supportedFormats.isEmpty()) {
+            return false;
+        }
+        CaptureFormat captureFormat = supportedFormats.get(resolutionItem);
+
+        Log.e(TAG, "resolution =: " + captureFormat.height + ":" + captureFormat.width);
+        QBRTCMediaConfig.setVideoHeight(captureFormat.height);
+        QBRTCMediaConfig.setVideoWidth(captureFormat.width);
+        return true;
+    }
+
+    private static String getPreferenceString(SharedPreferences sharedPref, Context context, int StrRes, int StrResDefValue) {
         return sharedPref.getString(context.getString(StrRes),
                 context.getString(StrResDefValue));
     }
 
-    private static String getPreferenceString(SharedPreferences sharedPref ,Context context, int StrRes, String defValue){
+    private static String getPreferenceString(SharedPreferences sharedPref, Context context, int StrRes, String defValue) {
         return sharedPref.getString(context.getString(StrRes),
                 defValue);
     }

@@ -11,7 +11,10 @@ import android.widget.TextView;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
+import com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew;
 import com.quickblox.videochat.webrtc.view.QBGLVideoView;
+
+import org.webrtc.VideoRendererGui;
 
 import java.util.List;
 
@@ -97,14 +100,14 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 public static class ViewHolder extends RecyclerView.ViewHolder {
     TextView opponentsName;
     TextView connectionStatus;
-    QBGLVideoView opponentView;
+    RTCGlVIew opponentView;
     private int userId;
 
     public ViewHolder(View itemView) {
         super(itemView);
         opponentsName = (TextView) itemView.findViewById(R.id.opponentName);
         connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
-        opponentView = (QBGLVideoView) itemView.findViewById(R.id.opponentView);
+        opponentView = (RTCGlVIew) itemView.findViewById(R.id.opponentView);
     }
 
     public void setStatus(String status){
@@ -119,11 +122,12 @@ public static class ViewHolder extends RecyclerView.ViewHolder {
         return userId;
     }
 
-    public QBGLVideoView getOpponentView() {
+    public RTCGlVIew getOpponentView() {
         return opponentView;
     }
 
     public void showOpponentView(boolean show){
+        // Create video renderers.
         opponentView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }
