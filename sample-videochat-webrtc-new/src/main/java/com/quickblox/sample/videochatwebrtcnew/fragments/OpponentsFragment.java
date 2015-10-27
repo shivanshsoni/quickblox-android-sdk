@@ -121,7 +121,6 @@ public class OpponentsFragment extends Fragment implements View.OnClickListener,
 
         btnAudioCall.setOnClickListener(this);
         btnVideoCall.setOnClickListener(this);
-        view.findViewById(R.id.btnScreenCapture).setOnClickListener(this);
         /*view.findViewById(R.id.crtChnnal).setOnClickListener(this);
         view.findViewById(R.id.closeChnnal).setOnClickListener(this);*/
 
