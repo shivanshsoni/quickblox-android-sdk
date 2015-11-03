@@ -209,7 +209,7 @@ public class ListUsersActivity extends Activity {
         QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
         requestBuilder.setPerPage(15);
         List<String> tags = new LinkedList<>();
-        tags.add(Consts.USERS_TAG);
+        tags.add(getString(R.string.user_tag));
 //            tags.add("webrtctest");
         QBUsers.getUsersByTags(tags, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>() {
             @Override

@@ -31,6 +31,7 @@ import com.quickblox.sample.videochatwebrtcnew.fragments.IncomeCallFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.OpponentsFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.ScreenCaptiringFragment;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
+import com.quickblox.sample.videochatwebrtcnew.util.ReflectionUtils;
 import com.quickblox.sample.videochatwebrtcnew.util.RingtonePlayer;
 import com.quickblox.sample.videochatwebrtcnew.util.SettingsUtil;
 import com.quickblox.users.model.QBUser;
@@ -45,6 +46,7 @@ import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
 
 import org.jivesoftware.smack.SmackException;
 import org.webrtc.VideoCapturerAndroid;
+import org.webrtc.VideoRendererGui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -402,12 +404,16 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
                 if (session.equals(getCurrentSession())) {
 
+                    Fragment currentFragment = getCurrentFragment();
                     if (isInCommingCall) {
                         stopIncomeCallTimer();
+                        if (currentFragment instanceof IncomeCallFragment) {
+                            removeIncomeCallFragment();
+                        }
                     }
 
                     Log.d(TAG, "Stop session");
-                    if (!(getCurrentFragment() instanceof OpponentsFragment)) {
+                    if (!(currentFragment instanceof OpponentsFragment)) {
                         addOpponentsFragment();
                     }
 
@@ -465,19 +471,10 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                 sessionUserCallback.onReceiveHangUpFromUser(session, userID);
             }
 
-
-            // TODO update view of this user
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-//                setStateTitle(userID, R.string.hungUp, View.INVISIBLE);
-                    showToast(R.string.hungUp);
-                    if (userID.equals(session.getCallerID())) {
-                        if (getCurrentFragment() instanceof IncomeCallFragment) {
-                            removeIncomeCallFragment();
-                            addOpponentsFragment();
-                        }
-                    }
+                    showToast(getString(R.string.hungUp) + "from user "+userID);
                 }
             });
         }

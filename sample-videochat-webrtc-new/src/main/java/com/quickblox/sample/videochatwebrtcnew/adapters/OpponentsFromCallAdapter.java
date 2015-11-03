@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
+import com.quickblox.sample.videochatwebrtcnew.fragments.ConversationFragment;
 import com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew;
 import com.quickblox.videochat.webrtc.view.QBGLVideoView;
 
@@ -38,6 +39,7 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
     private boolean showVideoView;
     private LayoutInflater inflater;
     private int columns;
+    private OnAdapterEventListener adapterListener;
 
 
     public OpponentsFromCallAdapter(Context context, List<User> users, int width, int height,
@@ -55,11 +57,15 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         Log.d(TAG, "item width=" + itemWidth + ", item height=" + itemHeight);
     }
 
-    private void setPadding(int itemMargin){
-        int allCellWidth = (itemWidth +(itemMargin*2)) * columns;
-        if ((allCellWidth < gridWidth) && ((gridWidth - allCellWidth) > (itemMargin *2)  )){ //set padding if it makes sense to do it
-            paddingLeft = (gridWidth - allCellWidth) /2;
+    private void setPadding(int itemMargin) {
+        int allCellWidth = (itemWidth + (itemMargin * 2)) * columns;
+        if ((allCellWidth < gridWidth) && ((gridWidth - allCellWidth) > (itemMargin * 2))) { //set padding if it makes sense to do it
+            paddingLeft = (gridWidth - allCellWidth) / 2;
         }
+    }
+
+    public void setAdapterListener(OnAdapterEventListener adapterListener) {
+        this.adapterListener = adapterListener;
     }
 
     @Override
@@ -89,6 +95,7 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 
         holder.opponentsName.setText(user.getFullName());
         holder.setUserId(user.getId());
+        adapterListener.OnBindViewHolder(holder, position);
     }
 
     @Override
@@ -96,40 +103,44 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         return position;
     }
 
-
-public static class ViewHolder extends RecyclerView.ViewHolder {
-    TextView opponentsName;
-    TextView connectionStatus;
-    RTCGlVIew opponentView;
-    private int userId;
-
-    public ViewHolder(View itemView) {
-        super(itemView);
-        opponentsName = (TextView) itemView.findViewById(R.id.opponentName);
-        connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
-        opponentView = (RTCGlVIew) itemView.findViewById(R.id.opponentView);
+    public interface OnAdapterEventListener {
+        public void OnBindViewHolder(ViewHolder holder, int position);
     }
 
-    public void setStatus(String status){
-        connectionStatus.setText(status);
-    }
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView opponentsName;
+        TextView connectionStatus;
+        RTCGlVIew opponentView;
+        private int userId;
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
+        public ViewHolder(View itemView) {
+            super(itemView);
+            opponentsName = (TextView) itemView.findViewById(R.id.opponentName);
+            connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
+            opponentView = (RTCGlVIew) itemView.findViewById(R.id.opponentView);
+        }
 
-    public int getUserId() {
-        return userId;
-    }
+        public void setStatus(String status) {
+            connectionStatus.setText(status);
+        }
 
-    public RTCGlVIew getOpponentView() {
-        return opponentView;
-    }
+        public void setUserId(int userId) {
+            this.userId = userId;
+        }
 
-    public void showOpponentView(boolean show){
-        // Create video renderers.
-        opponentView.setVisibility(show ? View.VISIBLE : View.GONE);
+        public int getUserId() {
+            return userId;
+        }
+
+        public RTCGlVIew getOpponentView() {
+            return opponentView;
+        }
+
+        public void showOpponentView(boolean show) {
+            // Create video renderers.
+            opponentView.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+
     }
-}
 
 }

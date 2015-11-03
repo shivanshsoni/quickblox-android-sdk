@@ -14,7 +14,8 @@
         android:layout_alignParentRight="true">
 
         <com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew
-            android:id="@+id/localVideoVidew"
+            android:visibility="invisible"
+            android:id="@+id/localViewForGroupCall"
             android:layout_width="100dp"
             android:layout_height="100dp"
             custom:viewType="local"
@@ -23,6 +24,7 @@
             />
 
         <ToggleButton
+            android:visibility="invisible"
             android:id="@+id/switchCameraToggle"
             android:layout_width="25dp"
             android:layout_height="25dp"

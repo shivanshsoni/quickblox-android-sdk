@@ -94,7 +94,7 @@ public class SettingsUtil {
 
     private static void setVideoQuality(int resolutionItem) {
         if (resolutionItem != -1) {
-            setVideoFromCameraFormats(resolutionItem);
+            setVideoFromLibraryPreferences(resolutionItem);
         }
     }
 
@@ -107,24 +107,6 @@ public class SettingsUtil {
 
             }
         }
-    }
-
-
-    private static boolean setVideoFromCameraFormats(int resolutionItem) {
-        int frontCameraId = CameraHelper.getIdOfFrontFacingDevice();
-        if (frontCameraId == -1) {
-            return false;
-        }
-        List<CaptureFormat> supportedFormats = CameraHelper.getSupportedFormats(frontCameraId);
-        if (supportedFormats == null || supportedFormats.isEmpty()) {
-            return false;
-        }
-        CaptureFormat captureFormat = supportedFormats.get(resolutionItem);
-
-        Log.e(TAG, "resolution =: " + captureFormat.height + ":" + captureFormat.width);
-        QBRTCMediaConfig.setVideoHeight(captureFormat.height);
-        QBRTCMediaConfig.setVideoWidth(captureFormat.width);
-        return true;
     }
 
     private static String getPreferenceString(SharedPreferences sharedPref, Context context, int StrRes, int StrResDefValue) {

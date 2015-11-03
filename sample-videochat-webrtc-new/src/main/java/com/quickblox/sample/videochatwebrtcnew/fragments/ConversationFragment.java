@@ -34,6 +34,7 @@ import com.quickblox.sample.videochatwebrtcnew.activities.ListUsersActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsFromCallAdapter;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 import com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew;
+import com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew.RendererConfig;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
@@ -53,7 +54,7 @@ import java.util.Map;
 /**
  * Created by tereha on 16.02.15.
  */
-public class ConversationFragment extends Fragment implements Serializable, QBRTCClientVideoTracksCallbacks, QBRTCSessionConnectionCallbacks, CallActivity.QBRTCSessionUserCallback {
+public class ConversationFragment extends Fragment implements Serializable, QBRTCClientVideoTracksCallbacks, QBRTCSessionConnectionCallbacks, CallActivity.QBRTCSessionUserCallback, OpponentsFromCallAdapter.OnAdapterEventListener {
 
     public static final String CALLER_NAME = "caller_name";
     public static final String SESSION_ID = "sessionID";
@@ -76,15 +77,13 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     private TextView incUserName;
     private View view;
     private Map<String, String> userInfo;
-    private boolean isVideoEnabled = true;
+    private boolean isVideoEnabled = false;
     private boolean isAudioEnabled = true;
     private List<QBUser> allUsers = new ArrayList<>();
     private LinearLayout actionVideoButtonsLayout;
-    private View actionBar;
     private String callerName;
     private LinearLayout noVideoImageContainer;
     private boolean isMessageProcessed;
-    private MediaPlayer ringtone;
     private RTCGlVIew localVideoView;
     private IntentFilter intentFilter;
     private AudioStreamReceiver audioStreamReceiver;
@@ -92,6 +91,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     private RecyclerView recyclerView;
     private SparseArray<OpponentsFromCallAdapter.ViewHolder> opponentViewHolders;
     private boolean isPeerToPeerCall;
+    private boolean useFrontCamera = true;
 
     public static ConversationFragment newInstance(List<User> opponents, String callerName,
                         QBRTCTypes.QBConferenceType qbConferenceType,
@@ -130,6 +130,9 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             sessionID = getArguments().getString(CallActivity.SESSION_ID);
             callerName = getArguments().getString(CallActivity.CALLER_NAME);
 
+            isPeerToPeerCall = opponents.size() == 1;
+            isVideoEnabled = (qbConferenceType ==
+                    QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO.getValue());
             Log.d(TAG, "CALLER_NAME: " + callerName);
             Log.d(TAG, "opponents: " + opponents.toString());
         }
@@ -137,7 +140,6 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         initViews(view);
         initButtonsListener();
         initSessionListener();
-//        createOpponentsList(opponents);
         setUpUiByCallType(qbConferenceType);
 
         return view;
@@ -149,11 +151,15 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     }
 
     private void setUpUiByCallType(int qbConferenceType) {
-        if (qbConferenceType == QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_AUDIO.getValue()) {
+        if (!isVideoEnabled) {
             cameraToggle.setVisibility(View.GONE);
-            switchCameraToggle.setVisibility(View.INVISIBLE);
+            if (switchCameraToggle != null) {
+                switchCameraToggle.setVisibility(View.INVISIBLE);
+            }
 
-            localVideoView.setVisibility(View.INVISIBLE);
+            if (localVideoView != null) {
+                localVideoView.setVisibility(View.INVISIBLE);
+            }
 
             imgMyCameraOff.setVisibility(View.INVISIBLE);
         }
@@ -161,20 +167,21 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
 
     public void actionButtonsEnabled(boolean enability) {
 
-
         cameraToggle.setEnabled(enability);
-        switchCameraToggle.setEnabled(enability);
         imgMyCameraOff.setEnabled(enability);
         micToggleVideoCall.setEnabled(enability);
         dynamicToggleVideoCall.setEnabled(enability);
 
-
         // inactivate toggle buttons
         cameraToggle.setActivated(enability);
-        switchCameraToggle.setActivated(enability);
         imgMyCameraOff.setActivated(enability);
         micToggleVideoCall.setActivated(enability);
         dynamicToggleVideoCall.setActivated(enability);
+
+        if (switchCameraToggle != null) {
+            switchCameraToggle.setActivated(enability);
+            switchCameraToggle.setEnabled(enability);
+        }
     }
 
 
@@ -212,9 +219,11 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
 
     private void initViews(View view) {
 
-        isPeerToPeerCall = opponents.size() == 1;
-        localVideoView = (RTCGlVIew) view.findViewById(R.id.localVideoVidew);
-        localVideoView.setVisibility(isPeerToPeerCall ? View.INVISIBLE: View.VISIBLE);
+        RTCGlVIew localViewForGroupCall = (RTCGlVIew) view.findViewById(R.id.localViewForGroupCall);
+        localViewForGroupCall.setVisibility(isPeerToPeerCall ? View.INVISIBLE: View.VISIBLE);
+        if (!isPeerToPeerCall) {
+            localVideoView = localViewForGroupCall;
+        }
         recyclerView = (RecyclerView) view.findViewById(R.id.grid_opponents);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), R.dimen.grid_item_divider));
         recyclerView.setHasFixedSize(true);
@@ -230,11 +239,12 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             }
         });
 
-
         opponentViewHolders = new SparseArray<>(opponents.size());
 
         cameraToggle = (ToggleButton) view.findViewById(R.id.cameraToggle);
-        switchCameraToggle = (ToggleButton) view.findViewById(R.id.switchCameraToggle);
+        if (!isPeerToPeerCall){
+            initSwitchCameraButton(view);
+        }
         dynamicToggleVideoCall = (ToggleButton) view.findViewById(R.id.dynamicToggleVideoCall);
         micToggleVideoCall = (ToggleButton) view.findViewById(R.id.micToggleVideoCall);
 
@@ -258,10 +268,12 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         int cellSize = defineMinSize(gridWidth, recyclerView.getMeasuredHeight(),
                 columnsCount, rowsCount, itemMargin);
         Log.i(TAG, "onGlobalLayout : cellSize=" + cellSize);
-        recyclerView.setAdapter(new OpponentsFromCallAdapter(getActivity(), opponents, cellSize,
+
+        OpponentsFromCallAdapter opponentsAdapter = new OpponentsFromCallAdapter(getActivity(), opponents, cellSize,
                 cellSize, gridWidth, columnsCount, (int) itemMargin,
-                QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO.getValue() == qbConferenceType
-        ));
+                isVideoEnabled);
+        opponentsAdapter.setAdapterListener(ConversationFragment.this);
+        recyclerView.setAdapter(opponentsAdapter);
     }
 
     private int defineMinSize(int measuredWidth, int measuredHeight, int columnsCount, int rowsCount, float padding) {
@@ -298,7 +310,8 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         // If user changed camera state few times and last state was CameraState.ENABLED_FROM_USER // Жень, глянь здесь, смысл в том, что мы здесь включаем камеру, если юзер ее не выключал
         // than we turn on cam, else we nothing change
         if (cameraState != CameraState.DISABLED_FROM_USER
-                && qbConferenceType == QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_VIDEO.getValue()) {
+                && isVideoEnabled) {
+            enableVideo(true);
             toggleCamera(true);
         }
     }
@@ -307,7 +320,8 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     public void onPause() {
         // If camera state is CameraState.ENABLED_FROM_USER or CameraState.NONE
         // than we turn off cam
-        if (cameraState != CameraState.DISABLED_FROM_USER) {
+        if (cameraState != CameraState.DISABLED_FROM_USER && isVideoEnabled) {
+            enableVideo(false);
             toggleCamera(false);
         }
 
@@ -322,24 +336,15 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         ((CallActivity) getActivity()).removeRTCSessionUserCallback(this);
     }
 
+    private void initSwitchCameraButton(View view){
+        switchCameraToggle = (ToggleButton) view.findViewById(R.id.switchCameraToggle);
+        switchCameraToggle.setOnClickListener(getCameraSwitchListener());
+        switchCameraToggle.setActivated(false);
+        switchCameraToggle.setVisibility(isVideoEnabled ?
+                View.VISIBLE : View.INVISIBLE);
+    }
+
     private void initButtonsListener() {
-
-        switchCameraToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (((CallActivity) getActivity()).getCurrentSession() != null) {
-                    ((CallActivity) getActivity()).getCurrentSession().switchCapturePosition(new Runnable() {
-                        @Override
-                        public void run() {
-//                            Toast.makeText(getActivity(), "Cam was switched", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    Log.d(TAG, "Camera was switched!");
-                }
-            }
-        });
-
-
         cameraToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -399,53 +404,51 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         });
     }
 
-    private void toggleCamera(boolean isNeedEnableCam) {
-        // TODO temporary insertion will be removed when GLVideoView will be fixed
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        displaymetrics.setToDefaults();
+    private View.OnClickListener getCameraSwitchListener(){
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        ViewGroup.LayoutParams layoutParams = imgMyCameraOff.getLayoutParams();
+                QBRTCSession currentSession = ((CallActivity) getActivity()).getCurrentSession();
+                if (currentSession != null) {
+                    useFrontCamera = !useFrontCamera;
+                    currentSession.switchCapturePosition(new Runnable() {
+                        @Override
+                        public void run() {
+                        }
+                    });
+                    Log.d(TAG, "Camera was switched!");
+                    RendererConfig config = new RendererConfig();
+                    config.mirror = useFrontCamera;
+                    localVideoView.updateRenderer(isPeerToPeerCall ? RTCGlVIew.RendererType.SECOND :
+                            RTCGlVIew.RendererType.MAIN, config);
+                }
 
-        layoutParams.height = localVideoView.getHeight();
-        layoutParams.width = localVideoView.getWidth();
-
-        imgMyCameraOff.setLayoutParams(layoutParams);
-
-        Log.d(TAG, "Width is: " + imgMyCameraOff.getLayoutParams().width + " height is:" + imgMyCameraOff.getLayoutParams().height);
-        // TODO end
-
-        if (((CallActivity) getActivity()).getCurrentSession() != null) {
-            ((CallActivity) getActivity()).getCurrentSession().setVideoEnabled(isNeedEnableCam);
-            cameraToggle.setChecked(isNeedEnableCam);
-
-            if (isNeedEnableCam) {
-                Log.d(TAG, "Camera is on!");
-                switchCameraToggle.setVisibility(View.VISIBLE);
-                imgMyCameraOff.setVisibility(View.INVISIBLE);
-            } else {
-                Log.d(TAG, "Camera is off!");
-                switchCameraToggle.setVisibility(View.INVISIBLE);
-                imgMyCameraOff.setVisibility(View.VISIBLE);
             }
+        };
+    }
+
+    private void toggleCamera(boolean isNeedEnableCam) {
+        cameraToggle.setChecked(isNeedEnableCam);
+        if (switchCameraToggle != null) {
+            switchCameraToggle.setVisibility(isNeedEnableCam ? View.VISIBLE : View.INVISIBLE);
         }
     }
+
+    private void enableVideo(boolean enable) {
+        QBRTCSession currentSession = ((CallActivity) getActivity()).getCurrentSession();
+
+        if (currentSession != null) {
+            currentSession.setVideoEnabled(enable);
+        }
+    }
+
 
     @Override
     public void onLocalVideoTrackReceive(QBRTCSession qbrtcSession, QBRTCVideoTrack videoTrack) {
         Log.d(TAG, "onLocalVideoTrackReceive() run");
-        if (isPeerToPeerCall) {
-            OpponentsFromCallAdapter.ViewHolder itemHolder = getViewHolderForOpponent(opponents.get(0).getId());
-            if (itemHolder == null) {
-                return;
-            }
-            RTCGlVIew remoteVideoView = itemHolder.getOpponentView();
-            if (remoteVideoView != null) {
-                fillVideoView(remoteVideoView, videoTrack, false);
-            }
-            return;
-        }
         if (localVideoView != null) {
-            fillVideoView(localVideoView, videoTrack, true);
+            fillVideoView(localVideoView, videoTrack, !isPeerToPeerCall);
         }
     }
 
@@ -459,6 +462,15 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         RTCGlVIew remoteVideoView = itemHolder.getOpponentView();
         if (remoteVideoView != null) {
             fillVideoView(remoteVideoView, videoTrack);
+        }
+    }
+
+    @Override
+    public void OnBindViewHolder(OpponentsFromCallAdapter.ViewHolder holder, int position) {
+        if (isPeerToPeerCall &&
+                isVideoEnabled) {
+            initSwitchCameraButton(holder.itemView);
+            localVideoView = holder.getOpponentView();
         }
     }
 
@@ -487,11 +499,9 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     }
 
     private void fillVideoView(RTCGlVIew videoView, QBRTCVideoTrack videoTrack, boolean remoteRenderer) {
-        //VideoRenderer remouteRenderer = new VideoRenderer(new VideoCallBacks(videoView, QBGLVideoView.Endpoint.REMOTE));
         videoTrack.addRenderer(new VideoRenderer(remoteRenderer ? videoView.obtainMainVideoRenderer() :
                 videoView.obtainSecondVideoRenderer()));
-        //videoView.setVideoTrack(videoTrack, QBGLVideoView.Endpoint.REMOTE);
-        Log.d(TAG, (remoteRenderer ? "remote" : "local")+" Track is rendering");
+        Log.d(TAG, (remoteRenderer ? "remote" : "local") + " Track is rendering");
     }
 
     private void fillVideoView(RTCGlVIew videoView, QBRTCVideoTrack videoTrack) {

@@ -40,6 +40,10 @@ android {
         dev {
             minSdkVersion rootProject.minSdkVersion
         }
+
+        ios {
+
+        }
     }
 
 }

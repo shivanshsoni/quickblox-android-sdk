@@ -65,6 +65,25 @@ public class RTCGlVIew extends GLSurfaceView{
         return localRendererCallback;
     }
 
+    public void updateRenderer(RendererType rendererType, RendererConfig config){
+        VideoRenderer.Callbacks callbacks = RendererType.MAIN.equals(rendererType) ? mainRendererCallback
+                :localRendererCallback;
+
+        int[] viewCoordinates = RendererType.MAIN.equals(rendererType) ? remoteCoords : localCoords;
+        VideoRendererGui.update(callbacks, viewCoordinates[0], viewCoordinates[1],
+                viewCoordinates[2], viewCoordinates[3],
+                VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, config.mirror);
+    }
+
+    public void  release(){
+        if (localRendererCallback != null) {
+            VideoRendererGui.remove(localRendererCallback);
+        }
+        if (mainRendererCallback != null) {
+            VideoRendererGui.remove(mainRendererCallback);
+        }
+    }
+
     private VideoRenderer.Callbacks initRenderer(boolean local, int[] viewCoordinates) {
         return VideoRendererGui.createGuiRenderer(
                     viewCoordinates[0], viewCoordinates[1],
@@ -119,6 +138,18 @@ public class RTCGlVIew extends GLSurfaceView{
         if (resources.length >= NUMBER_COORDINATES) {
             System.arraycopy(resources, 0, coordinates, 0, NUMBER_COORDINATES);
         }
+    }
+
+    public static class RendererConfig{
+        public int x;
+        public int y;
+        public int width;
+        public int height;
+        public boolean mirror;
+    }
+
+    public enum RendererType {
+        MAIN, SECOND
     }
 
     public enum ViewType {
