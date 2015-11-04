@@ -10,14 +10,6 @@
         android:entryValues="@array/videoResolutionsValues" />
 
     <ListPreference
-        android:key="@string/pref_fps_key"
-        android:title="@string/pref_fps_title"
-        android:defaultValue="@string/pref_fps_default"
-        android:dialogTitle="@string/pref_fps_dlg"
-        android:entries="@array/cameraFps"
-        android:entryValues="@array/cameraFpsValues" />
-
-    <ListPreference
         android:key="@string/pref_startbitrate_key"
         android:title="@string/pref_startbitrate_title"
         android:defaultValue="@string/pref_startbitrate_default"

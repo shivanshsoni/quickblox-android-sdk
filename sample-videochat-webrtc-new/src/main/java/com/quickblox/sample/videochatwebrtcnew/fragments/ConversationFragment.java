@@ -33,9 +33,11 @@ import com.quickblox.sample.videochatwebrtcnew.activities.CallActivity;
 import com.quickblox.sample.videochatwebrtcnew.activities.ListUsersActivity;
 import com.quickblox.sample.videochatwebrtcnew.adapters.OpponentsFromCallAdapter;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
+import com.quickblox.sample.videochatwebrtcnew.util.CameraUtils;
 import com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew;
 import com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew.RendererConfig;
 import com.quickblox.users.model.QBUser;
+import com.quickblox.videochat.webrtc.QBMediaStreamManager;
 import com.quickblox.videochat.webrtc.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
 import com.quickblox.videochat.webrtc.QBRTCTypes;
@@ -44,6 +46,7 @@ import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
 import com.quickblox.videochat.webrtc.view.QBRTCVideoTrack;
 
 import org.webrtc.VideoRenderer;
+import org.webrtc.videoengine.VideoCaptureAndroid;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -411,15 +414,22 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
 
                 QBRTCSession currentSession = ((CallActivity) getActivity()).getCurrentSession();
                 if (currentSession != null) {
-                    useFrontCamera = !useFrontCamera;
-                    currentSession.switchCapturePosition(new Runnable() {
+                    QBMediaStreamManager mediaStreamManager = currentSession.getMediaStreamManager();
+                    if (mediaStreamManager == null){
+                        return;
+                    }
+                    boolean cameraSwitched = mediaStreamManager.switchCameraInput(new Runnable() {
                         @Override
                         public void run() {
                         }
                     });
+                    if (!cameraSwitched){
+                        return;
+                    }
+                    int currentCameraId = mediaStreamManager.getCurrentCameraId();
                     Log.d(TAG, "Camera was switched!");
                     RendererConfig config = new RendererConfig();
-                    config.mirror = useFrontCamera;
+                    config.mirror = CameraUtils.isCameraFront(currentCameraId);
                     localVideoView.updateRenderer(isPeerToPeerCall ? RTCGlVIew.RendererType.SECOND :
                             RTCGlVIew.RendererType.MAIN, config);
                 }
@@ -499,8 +509,9 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     }
 
     private void fillVideoView(RTCGlVIew videoView, QBRTCVideoTrack videoTrack, boolean remoteRenderer) {
-        videoTrack.addRenderer(new VideoRenderer(remoteRenderer ? videoView.obtainMainVideoRenderer() :
-                videoView.obtainSecondVideoRenderer()));
+        videoTrack.addRenderer(new VideoRenderer(remoteRenderer ?
+                videoView.obtainVideoRenderer(RTCGlVIew.RendererType.MAIN) :
+                videoView.obtainVideoRenderer(RTCGlVIew.RendererType.SECOND) ));
         Log.d(TAG, (remoteRenderer ? "remote" : "local") + " Track is rendering");
     }
 

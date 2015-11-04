@@ -30,7 +30,6 @@ public class SettingsUtil {
             QBRTCMediaConfig.setVideoHeight(QBRTCMediaConfig.VideoQuality.QBGA_VIDEO.height);
             QBRTCMediaConfig.setVideoHWAcceleration(false);
             QBRTCMediaConfig.setVideoCodec(null);
-            QBRTCMediaConfig.setVideoFps(0);
         }
     }
 
@@ -55,12 +54,6 @@ public class SettingsUtil {
                 "0"));
         Log.e(TAG, "resolutionItem =: " + resolutionItem);
         setVideoQuality(resolutionItem);
-
-        // Get camera fps from settings.
-        int fps = Integer.parseInt(sharedPref.getString(context.getString(R.string.pref_fps_key),
-                "0"));
-        Log.e(TAG, "cameraFps =: " + fps);
-        QBRTCMediaConfig.setVideoFps(fps);
 
         // Get start bitrate.
         String bitrateTypeDefault = context.getString(R.string.pref_startbitrate_default);

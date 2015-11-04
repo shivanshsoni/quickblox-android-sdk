@@ -205,8 +205,8 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         }
     }
 
-    private void startIncomeCallTimer() {
-        showIncomingCallWindowTaskHandler.postAtTime(showIncomingCallWindowTask, SystemClock.uptimeMillis() + TimeUnit.SECONDS.toMillis(QBRTCConfig.getAnswerTimeInterval()));
+    private void startIncomeCallTimer(long time) {
+        showIncomingCallWindowTaskHandler.postAtTime(showIncomingCallWindowTask, SystemClock.uptimeMillis() + time);
     }
 
     private void stopIncomeCallTimer() {
@@ -280,7 +280,6 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
                     isInCommingCall = true;
                     initIncommingCallTask();
-                    startIncomeCallTimer();
                 } else {
                     Log.d(TAG, "Stop new session. Device now is busy");
                     session.rejectCall(null);
@@ -305,6 +304,11 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                     ringtonePlayer.stopOutBeep();
             }
         });
+    }
+
+    @Override
+    public void onUserNoActions(QBRTCSession qbrtcSession, Integer integer) {
+        startIncomeCallTimer(0);
     }
 
     @Override
@@ -474,7 +478,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showToast(getString(R.string.hungUp) + "from user "+userID);
+                    showToast(getString(R.string.hungUp) + "received from user "+userID);
                 }
             });
         }
@@ -616,7 +620,6 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     @Override
     public void onBackPressed() {
-        // Logout on back btn click
         Fragment fragment = getFragmentManager().findFragmentByTag(CONVERSATION_CALL_FRAGMENT);
         if (fragment == null) {
             super.onBackPressed();
