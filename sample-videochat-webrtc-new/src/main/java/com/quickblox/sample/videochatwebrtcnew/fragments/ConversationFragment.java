@@ -480,6 +480,8 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             initSwitchCameraButton(holder.itemView);
             localVideoView = holder.getOpponentView();
         } else {
+            //on group call we postpone initialization of localVideoView due to set it on Gui renderer,
+            // after all opponents view have been initialized
             (new Handler()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
