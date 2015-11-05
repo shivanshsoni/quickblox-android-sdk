@@ -29,9 +29,7 @@ import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.fragments.ConversationFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.IncomeCallFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.OpponentsFragment;
-import com.quickblox.sample.videochatwebrtcnew.fragments.ScreenCaptiringFragment;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
-import com.quickblox.sample.videochatwebrtcnew.util.ReflectionUtils;
 import com.quickblox.sample.videochatwebrtcnew.util.RingtonePlayer;
 import com.quickblox.sample.videochatwebrtcnew.util.SettingsUtil;
 import com.quickblox.users.model.QBUser;
@@ -46,13 +44,11 @@ import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
 
 import org.jivesoftware.smack.SmackException;
 import org.webrtc.VideoCapturerAndroid;
-import org.webrtc.VideoRendererGui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tereha on 16.02.15.

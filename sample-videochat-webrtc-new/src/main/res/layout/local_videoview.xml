@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+    <com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/localViewForGroupCall"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:viewType="local"
+        custom:firstCoords="@array/localViewCoordinates"
+        custom:mainMirror="true"
+        />

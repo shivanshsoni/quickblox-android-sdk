@@ -95,7 +95,9 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 
         holder.opponentsName.setText(user.getFullName());
         holder.setUserId(user.getId());
-        adapterListener.OnBindViewHolder(holder, position);
+        if (position == (opponents.size() -1 )) {
+            adapterListener.OnBindViewHolder(holder, position);
+        }
     }
 
     @Override

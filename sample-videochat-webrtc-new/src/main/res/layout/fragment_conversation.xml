@@ -8,20 +8,15 @@
     android:background="@color/white">
 
     <FrameLayout
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:id="@+id/localView"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_alignParentRight="true">
 
-        <com.quickblox.sample.videochatwebrtcnew.view.RTCGlVIew
-            android:visibility="invisible"
-            android:id="@+id/localViewForGroupCall"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            custom:viewType="local"
-            custom:firstCoords="@array/localViewCoordinates"
-            custom:mainMirror="true"
-            />
+        <ViewStub android:id="@+id/localViewStub"
+            android:layout_width="match_parent"
+            android:layout="@layout/local_videoview"
+            android:layout_height="match_parent" />
 
         <ToggleButton
             android:visibility="invisible"
