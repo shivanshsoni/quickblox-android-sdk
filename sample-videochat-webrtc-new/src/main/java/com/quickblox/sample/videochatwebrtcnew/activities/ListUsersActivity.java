@@ -207,17 +207,15 @@ public class ListUsersActivity extends Activity {
     private void loadUsers(){
         showProgress(true);
         QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
-        requestBuilder.setPerPage(15);
+        requestBuilder.setPerPage(20);
         List<String> tags = new LinkedList<>();
         tags.add(getString(R.string.user_tag));
-//            tags.add("webrtctest");
         QBUsers.getUsersByTags(tags, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>() {
             @Override
             public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
                 showProgress(false);
                 users.clear();
                 users.addAll(DataHolder.createUsersList(qbUsers));
-//                    Log.d(TAG, "download users from QickBlox");
                 initUsersList();
             }
 

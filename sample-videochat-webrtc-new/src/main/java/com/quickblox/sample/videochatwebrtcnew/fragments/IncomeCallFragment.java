@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,14 +31,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tereha on 16.02.15.
  */
-public class IncomeCallFragment extends Fragment implements Serializable{
+public class IncomeCallFragment extends Fragment implements Serializable, View.OnClickListener {
 
     private static final String TAG = IncomeCallFragment.class.getSimpleName();
     private static final java.lang.String INCOME_WINDOW_SHOW = "WINDOW_SHOW_TMER'";
+    private static final long CLICK_DELAY = TimeUnit.SECONDS.toMillis(2);
     private TextView incVideoCall;
     private TextView incAudioCall;
     private TextView callerName;
@@ -53,6 +56,7 @@ public class IncomeCallFragment extends Fragment implements Serializable{
     private QBRTCTypes.QBConferenceType conferenceType;
     private int qbConferenceType;
     private View view;
+    private long lastCliclTime = 0l;
 
 
     @Override
@@ -101,33 +105,8 @@ public class IncomeCallFragment extends Fragment implements Serializable{
     }
 
     private void initButtonsListener() {
-            rejectBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    rejectBtn.setClickable(false);
-                    Log.d(TAG, "Call is rejected");
-
-                    stopCallNotification();
-
-                    ((CallActivity) getActivity()).rejectCurrentSession();
-                    ((CallActivity) getActivity()).removeIncomeCallFragment();
-                    ((CallActivity) getActivity()).addOpponentsFragment();
-
-                }
-            });
-
-            takeBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    takeBtn.setClickable(false);
-                    stopCallNotification();
-
-                    ((CallActivity) getActivity())
-                            .addConversationFragmentReceiveCall();
-
-                    Log.d(TAG, "Call is started");
-                }
-            });
+        rejectBtn.setOnClickListener(this);
+        takeBtn.setOnClickListener(this);
     }
 
     private void initUI(View view) {
@@ -237,4 +216,43 @@ public class IncomeCallFragment extends Fragment implements Serializable{
         Log.d(TAG, "onDestroy() from IncomeCallFragment");
     }
 
+    @Override
+    public void onClick(View v) {
+
+        if ((SystemClock.uptimeMillis() - lastCliclTime) < CLICK_DELAY) {
+            return;
+        }
+        lastCliclTime = SystemClock.uptimeMillis();
+        switch (v.getId()) {
+            case R.id.rejectBtn:
+                reject();
+                break;
+            case R.id.takeBtn:
+                accept();
+                break;
+            default:
+                break;
+        }
+    };
+
+    private void accept() {
+        takeBtn.setClickable(false);
+        stopCallNotification();
+
+        ((CallActivity) getActivity())
+                .addConversationFragmentReceiveCall();
+
+        Log.d(TAG, "Call is started");
+    }
+
+    private void reject() {
+        rejectBtn.setClickable(false);
+        Log.d(TAG, "Call is rejected");
+
+        stopCallNotification();
+
+        ((CallActivity) getActivity()).rejectCurrentSession();
+        ((CallActivity) getActivity()).removeIncomeCallFragment();
+        ((CallActivity) getActivity()).addOpponentsFragment();
+    }
 }

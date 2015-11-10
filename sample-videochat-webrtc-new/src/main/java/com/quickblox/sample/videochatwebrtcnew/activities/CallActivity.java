@@ -29,7 +29,9 @@ import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.fragments.ConversationFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.IncomeCallFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.OpponentsFragment;
+import com.quickblox.sample.videochatwebrtcnew.fragments.ScreenCaptiringFragment;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
+import com.quickblox.sample.videochatwebrtcnew.util.FragmentExecuotr;
 import com.quickblox.sample.videochatwebrtcnew.util.RingtonePlayer;
 import com.quickblox.sample.videochatwebrtcnew.util.SettingsUtil;
 import com.quickblox.users.model.QBUser;
@@ -64,6 +66,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     public static final String OPPONENTS_CALL_FRAGMENT = "opponents_call_fragment";
     public static final String INCOME_CALL_FRAGMENT = "income_call_fragment";
     public static final String CONVERSATION_CALL_FRAGMENT = "conversation_call_fragment";
+    public static final String CAPTURERL_FRAGMENT = "capturer_fragment";
     public static final String CALLER_NAME = "caller_name";
     public static final String SESSION_ID = "sessionID";
     public static final String START_CONVERSATION_REASON = "start_conversation_reason";
@@ -486,9 +489,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
     public void addOpponentsFragment() {
-        if (isInFront) {
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container, new OpponentsFragment(), OPPONENTS_CALL_FRAGMENT).commit();
-        }
+        FragmentExecuotr.addFragment(getFragmentManager(), R.id.fragment_container,  new OpponentsFragment(), OPPONENTS_CALL_FRAGMENT);
     }
 
 
@@ -497,7 +498,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         Fragment fragment = fragmentManager.findFragmentByTag(INCOME_CALL_FRAGMENT);
 
         if (fragment != null) {
-            fragmentManager.beginTransaction().remove(fragment).commit();
+            FragmentExecuotr.removeFragment(fragmentManager, fragment);
         }
     }
 
@@ -511,7 +512,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             bundle.putIntegerArrayList("opponents", new ArrayList<>(session.getOpponents()));
             bundle.putInt(ApplicationSingleton.CONFERENCE_TYPE, session.getConferenceType().getValue());
             fragment.setArguments(bundle);
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, INCOME_CALL_FRAGMENT).commit();
+            FragmentExecuotr.addFragment(getFragmentManager(), R.id.fragment_container, fragment, INCOME_CALL_FRAGMENT);
         } else {
             Log.d(TAG, "SKIP addIncomeCallFragment method");
         }
@@ -531,7 +532,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         ConversationFragment fragment = ConversationFragment.newInstance(opponents, opponents.get(0).getFullName(),
                 qbConferenceType, userInfo,
                 StartConversetionReason.OUTCOME_CALL_MADE, getCurrentSession().getSessionID());
-        getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, CONVERSATION_CALL_FRAGMENT).commitAllowingStateLoss();
+        FragmentExecuotr.addFragment(getFragmentManager(), R.id.fragment_container, fragment, CONVERSATION_CALL_FRAGMENT);
         ringtonePlayer.startOutBeep();
     }
 
@@ -562,7 +563,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                     session.getConferenceType(), session.getUserInfo(),
                     StartConversetionReason.INCOME_CALL_FOR_ACCEPTION, getCurrentSession().getSessionID());
             // Start conversation fragment
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment, CONVERSATION_CALL_FRAGMENT).commit();
+            FragmentExecuotr.addFragment(getFragmentManager(), R.id.fragment_container, fragment, CONVERSATION_CALL_FRAGMENT);
         }
     }
 
@@ -607,6 +608,11 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     public SharedPreferences getDefaultSharedPrefs() {
         return sharedPref;
+    }
+
+    public void showCapturer() {
+        /*ScreenCaptiringFragment captiringFragment = new ScreenCaptiringFragment();
+        FragmentExecuotr.addFragment(getFragmentManager(), R.id.fragment_container, captiringFragment, CAPTURERL_FRAGMENT);*/
     }
 
     public static enum StartConversetionReason {
