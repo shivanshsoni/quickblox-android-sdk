@@ -22,7 +22,6 @@ import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -404,23 +403,39 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
                 boolean cameraSwitched = mediaStreamManager.switchCameraInput(new Runnable() {
                     @Override
                     public void run() {
-
+                        toggleCameraOnUiThread(false);
+                        int currentCameraId = mediaStreamManager.getCurrentCameraId();
+                        Log.d(TAG, "Camera was switched!");
+                        RendererConfig config = new RendererConfig();
+                        config.mirror = CameraUtils.isCameraFront(currentCameraId);
+                        localVideoView.updateRenderer(isPeerToPeerCall ? RTCGlVIew.RendererSurface.SECOND :
+                                RTCGlVIew.RendererSurface.MAIN, config);
+                        (new Handler()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toggleCameraOnUiThread(true);
+                            }
+                        }, 1000);
                     }
                 });
-
-                if (!cameraSwitched) {
-                    return;
-                }
-                int currentCameraId = mediaStreamManager.getCurrentCameraId();
-                Log.d(TAG, "Camera was switched!");
-                RendererConfig config = new RendererConfig();
-                config.mirror = CameraUtils.isCameraFront(currentCameraId);
-                localVideoView.updateRenderer(isPeerToPeerCall ? RTCGlVIew.RendererSurface.SECOND :
-                        RTCGlVIew.RendererSurface.MAIN, config);
             }
 
         };
+    }
 
+    private void toggleCameraOnUiThread(final boolean toggle){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                toggleCamera(toggle);
+            }
+        });
+    }
+
+    private void runOnUiThread(Runnable runnable){
+        if (!isDetached()) {
+            getActivity().runOnUiThread(runnable);
+        }
     }
 
     private void toggleCamera(boolean isNeedEnableCam) {
