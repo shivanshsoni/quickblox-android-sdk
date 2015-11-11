@@ -1,4 +1,4 @@
-package com.quickblox.sample.videochatwebrtcnew.sharing;
+package com.quickblox.screencapturer.sharing;
 
 import android.graphics.ImageFormat;
 
@@ -12,6 +12,7 @@ public class CaptureFormat {
     public final int width;
     public final int height;
     public final int maxFramerate;
+    private boolean opaque;
     public final int minFramerate;
     // TODO(hbos): If VideoCapturerAndroid.startCapture is updated to support
     // other image formats then this needs to be updated and
@@ -20,16 +21,17 @@ public class CaptureFormat {
     public final int imageFormat = ImageFormat.YV12;
 
     public CaptureFormat(int width, int height, int minFramerate,
-                         int maxFramerate) {
+                         int maxFramerate, boolean opaque) {
         this.width = width;
         this.height = height;
         this.minFramerate = minFramerate;
         this.maxFramerate = maxFramerate;
+        this.opaque = opaque;
     }
 
     // Calculates the frame size of this capture format.
     public int frameSize() {
-        return frameSize(width, height, imageFormat);
+        return frameSize(width, height, imageFormat, opaque);
     }
 
     // Calculates the frame size of the specified image format. Currently only
@@ -37,16 +39,16 @@ public class CaptureFormat {
     // multiple of 16 of the width and width and height are always even.
     // Android guarantees this:
     // http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setPreviewFormat%28int%29
-    public static int frameSize(int width, int height, int imageFormat) {
+    public static int frameSize(int width, int height, int imageFormat,  boolean opaque) {
         if (imageFormat != ImageFormat.YV12) {
             throw new UnsupportedOperationException("Don't know how to calculate "
                     + "the frame size of non-YV12 image formats.");
         }
-        int yStride = roundUp(width, 16);
+     /*   int yStride = roundUp(width, 16);
         int uvStride = roundUp(yStride / 2, 16);
         int ySize = yStride * height;
-        int uvSize = uvStride * height / 2;
-        return ySize + uvSize * 2;
+        int uvSize = uvStride * height / 2;*/
+        return width * height *  (!opaque ? 2 : 4);
     }
 
     // Rounds up |x| to the closest value that is a multiple of |alignment|.

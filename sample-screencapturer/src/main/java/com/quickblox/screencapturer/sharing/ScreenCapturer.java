@@ -1,4 +1,4 @@
-package com.quickblox.sample.videochatwebrtcnew.sharing;
+package com.quickblox.screencapturer.sharing;
 
 
 import android.app.Activity;
@@ -11,17 +11,13 @@ import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
 
-import org.webrtc.Logging;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class ScreenCapturer implements Screen.ScreenObserver {
@@ -48,9 +44,8 @@ public class ScreenCapturer implements Screen.ScreenObserver {
     public ScreenCapturer(){
         //Logging.d(TAG, "ScreenCapturer");
         screenThread = new HandlerThread(TAG);
-        //screenThread.start();
-        //screenThreadHandler = new Handler(screenThread.getLooper());
-        //videoBuffers = new FramePool(screenThread);
+        screenThread.start();
+        screenThreadHandler = new Handler(screenThread.getLooper());
     }
 
     // Called by native code.
@@ -96,13 +91,14 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         this.frameObserver = frameObserver;
         try {
             obtainScreen(applicationContext);
+            videoBuffers = new FramePool(screen.getThread());
             startPreviewOnCameraThread(width, height, framerate);
             frameObserver.OnCapturerStarted(true);
 
             // Start camera observer.
             cameraFramesCount = 0;
             captureBuffersCount = 0;
-            //screenThreadHandler.postDelayed(screenObserver, SCREEN_OBSERVER_PERIOD_MS);
+            screenThreadHandler.postDelayed(screenObserver, SCREEN_OBSERVER_PERIOD_MS);
             return;
         } catch (RuntimeException e) {
             error = e;
@@ -120,6 +116,8 @@ public class ScreenCapturer implements Screen.ScreenObserver {
 
     private void stopCaptureOnCameraThread() {
         screen.stopPreview();
+        screenThreadHandler.removeCallbacks(screenObserver);
+        videoBuffers.stopReturnBuffersToCamera();
         screen.release();
         screen = null;
     }
@@ -136,12 +134,12 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         ((Activity)applicationContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         CaptureFormat captureFormat = new CaptureFormat(
                 displayMetrics.widthPixels, displayMetrics.heightPixels,
-                30, 60);
+                30, 60, ((Activity)applicationContext).getWindow().getDecorView().isOpaque());
 
         // (Re)start preview.
         Log.d(TAG, "Start capturing: " + captureFormat);
         this.captureFormat = captureFormat;
-//        videoBuffers.queueCameraBuffers(captureFormat.frameSize());
+        videoBuffers.queueCameraBuffers(captureFormat.frameSize());
 
         startPreview();
     }
@@ -183,17 +181,27 @@ public class ScreenCapturer implements Screen.ScreenObserver {
 
     @Override
     public void onPreviewFrame(Bitmap bitmap, int rotation) {
+
         final long captureTimeNs =
                 TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
-
-        captureBuffersCount ++;// videoBuffers.numCaptureBuffersAvailable();
+        Log.i(TAG, "onPreviewFrame time="+captureTimeNs);
+        Log.i(TAG, "onPreviewFrame bmp width="+bitmap.getWidth() +", hight="+bitmap.getHeight()
+                +", bytes count="+bitmap.getByteCount());
+        captureBuffersCount = videoBuffers.numCaptureBuffersAvailable();
         int currRotation = getDeviceOrientation();
         // Mark the frame owning |data| as used.
         // Note that since data is directBuffer,
         // data.length >= videoBuffers.frameSize.
-        //if (videoBuffers.reserveByteBuffer(data, captureTimeNs)) {
-        cameraFramesCount++;
-        frameObserver.OnFrameCaptured(bitmap, currRotation, captureTimeNs);
+        // Mark the frame owning |data| as used.
+        // Note that since data is directBuffer,
+        // data.length >= videoBuffers.frameSize.
+        byte[] bytes = convertBmpToBytes(bitmap);
+        if (videoBuffers.reserveByteBuffer(bytes, captureTimeNs)) {
+            cameraFramesCount++;
+            frameObserver.OnFrameCaptured(bitmap, rotation, captureTimeNs);
+        } else {
+            Log.w(TAG, "reserveByteBuffer failed - dropping frame.");
+        }
     }
 
     // Camera observer - monitors camera framerate and amount of available
@@ -254,13 +262,13 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         // Arbitrary queue depth.  Higher number means more memory allocated & held,
         // lower number means more sensitivity to processing time in the client (and
         // potentially stalling the capturer if it runs out of buffers to write to).
-        private static final int numCaptureBuffers = 3;
+        private static final int numCaptureBuffers = 1;
         // This container tracks the buffers added as camera callback buffers. It is needed for finding
         // the corresponding ByteBuffer given a byte[].
-        private final Map<byte[], ByteBuffer> queuedBuffers = new IdentityHashMap<byte[], ByteBuffer>();
+        private final Map<Integer, ByteBuffer> queuedBuffers = new HashMap<>();
         // This container tracks the frames that have been sent but not returned. It is needed for
         // keeping the buffers alive and for finding the corresponding ByteBuffer given a timestamp.
-        private final Map<Long, ByteBuffer> pendingBuffers = new HashMap<Long, ByteBuffer>();
+        private final Map<Long, ByteBuffer> pendingBuffers = new HashMap<>();
         private int frameSize = 0;
         private Camera camera;
 
@@ -269,9 +277,9 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         }
 
         private void checkIsOnValidThread() {
-            if (Thread.currentThread() != thread) {
+            /*if (Thread.currentThread() != thread) {
                 throw new IllegalStateException("Wrong thread");
-            }
+            }*/
         }
 
         public int numCaptureBuffersAvailable() {
@@ -282,16 +290,15 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         // Discards previous queued buffers and adds new callback buffers to camera.
         public void queueCameraBuffers(int frameSize) {
             checkIsOnValidThread();
-            this.camera = camera;
             this.frameSize = frameSize;
 
             queuedBuffers.clear();
             for (int i = 0; i < numCaptureBuffers; ++i) {
                 final ByteBuffer buffer = ByteBuffer.allocateDirect(frameSize);
-                queuedBuffers.put(buffer.array(), buffer);
+                queuedBuffers.put(frameSize, buffer);
             }
-          /*  Logging.d(TAG, "queueCameraBuffers enqueued " + numCaptureBuffers
-                    + " buffers of size " + frameSize + ".");*/
+            Log.d(TAG, "queueCameraBuffers enqueued " + numCaptureBuffers
+                    + " buffers of size " + frameSize + ".");
         }
 
         // Return number of pending frames that have not been returned.
@@ -314,15 +321,15 @@ public class ScreenCapturer implements Screen.ScreenObserver {
             this.camera = null;
             queuedBuffers.clear();
             // Frames in |pendingBuffers| need to be kept alive until they are returned.
-           /* Logging.d(TAG, "stopReturnBuffersToCamera called."
+            Log.d(TAG, "stopReturnBuffersToCamera called."
                     + (pendingBuffers.isEmpty() ?
                     " All buffers have been returned."
-                    : " Pending buffers: " + pendingFramesTimeStamps() + "."));*/
+                    : " Pending buffers: " + pendingFramesTimeStamps() + "."));
         }
 
         public boolean reserveByteBuffer(byte[] data, long timeStamp) {
             checkIsOnValidThread();
-            final ByteBuffer buffer = queuedBuffers.remove(data);
+            final ByteBuffer buffer = queuedBuffers.remove(data.length);
             if (buffer == null) {
                 // Frames might be posted to |onPreviewFrame| with the previous format while changing
                 // capture format in |startPreviewOnCameraThread|. Drop these old frames.
@@ -345,7 +352,7 @@ public class ScreenCapturer implements Screen.ScreenObserver {
             return true;
         }
 
-      /*  public void returnBuffer(long timeStamp) {
+        public void returnBuffer(long timeStamp) {
             checkIsOnValidThread();
             final ByteBuffer returnedFrame = pendingBuffers.remove(timeStamp);
             if (returnedFrame == null) {
@@ -356,15 +363,15 @@ public class ScreenCapturer implements Screen.ScreenObserver {
             if (camera != null && returnedFrame.capacity() == frameSize) {
                 camera.addCallbackBuffer(returnedFrame.array());
                 if (queuedBuffers.isEmpty()) {
-                    Logging.v(TAG, "Frame returned when camera is running out of capture"
+                    Log.v(TAG, "Frame returned when camera is running out of capture"
                             + " buffers for TS " + TimeUnit.NANOSECONDS.toMillis(timeStamp));
                 }
-                queuedBuffers.put(returnedFrame.array(), returnedFrame);
+                queuedBuffers.put(returnedFrame.array().length, returnedFrame);
                 return;
-            }*/
+            }
 
-          /*  if (returnedFrame.capacity() != frameSize) {
-                Logging.d(TAG, "returnBuffer with time stamp "
+            if (returnedFrame.capacity() != frameSize) {
+                Log.d(TAG, "returnBuffer with time stamp "
                         + TimeUnit.NANOSECONDS.toMillis(timeStamp)
                         + " called with old frame size, " + returnedFrame.capacity() + ".");
                 // Since this frame has the wrong size, don't requeue it. Frames with the correct size are
@@ -372,10 +379,10 @@ public class ScreenCapturer implements Screen.ScreenObserver {
                 return;
             }
 
-            Logging.d(TAG, "returnBuffer with time stamp "
+            Log.d(TAG, "returnBuffer with time stamp "
                     + TimeUnit.NANOSECONDS.toMillis(timeStamp)
-                    + " called after camera has been stopped.");*/
-     /*   }*/
+                    + " called after camera has been stopped.");
+        }
     }
 
     // Interface used for providing callbacks to an observer.
@@ -403,12 +410,15 @@ public class ScreenCapturer implements Screen.ScreenObserver {
          void OnFrameCaptured(Bitmap bmp,
                                       int rotation, long timeStamp);
 
+         void OnFrameCaptured(int[] data, int width, int height,
+                             int rotation, long timeStamp);
+
          void OnOutputFormatRequest(int width, int height, int fps);
     }
 
     // An implementation of CapturerObserver that forwards all calls from
     // Java to the C layer.
- /*   static class NativeObserver implements CapturerObserver {
+   /* static class NativeObserver implements CapturerSimpleObserver {
         private final long nativeCapturer;
 
         public NativeObserver(long nativeCapturer) {
@@ -421,9 +431,13 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         }
 
         @Override
-        public void OnFrameCaptured(byte[] data, int length, int width, int height,
-                                    int rotation, long timeStamp) {
-            nativeOnFrameCaptured(nativeCapturer, data, length, width, height, rotation, timeStamp);
+        public void OnFrameCaptured(Bitmap bmp, int rotation, long timeStamp) {
+
+        }
+
+        @Override
+        public void OnFrameCaptured(int[] data, int rotation, long timeStamp) {
+            nativeOnFrameCaptured(nativeCapturer, data, rotation, timeStamp);
         }
 
         @Override
@@ -434,7 +448,7 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         private native void nativeCapturerStarted(long nativeCapturer,
                                                   boolean success);
         private native void nativeOnFrameCaptured(long nativeCapturer,
-                                                  byte[] data, int length, int width, int height, int rotation, long timeStamp);
+                                                  byte[] data, int rotation, long timeStamp);
         private native void nativeOnOutputFormatRequest(long nativeCapturer,
                                                         int width, int height, int fps);
     }*/

@@ -1,6 +1,5 @@
-package com.quickblox.sample.videochatwebrtcnew.fragments;
+package com.quickblox.screencapturer.fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,13 +13,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.quickblox.sample.videochatwebrtcnew.R;
-import com.quickblox.sample.videochatwebrtcnew.sharing.ScreenCapturer;
+import com.quickblox.screencapturer.R;
+import com.quickblox.screencapturer.sharing.ScreenCapturer;
 
 
-/**
- * Created by vadim on 10/21/15.
- */
 public class ScreenCaptiringFragment extends Fragment implements View.OnClickListener, ScreenCapturer.CapturerSimpleObserver {
 
     private static final String TAG = ScreenCaptiringFragment.class.getSimpleName();
@@ -77,7 +73,7 @@ public class ScreenCaptiringFragment extends Fragment implements View.OnClickLis
     }
 
     @Override
-    public void OnFrameCaptured(int[] data, int rotation, long timeStamp) {
+    public void OnFrameCaptured(int[] data, int width, int height, int rotation, long timeStamp) {
 
     }
 

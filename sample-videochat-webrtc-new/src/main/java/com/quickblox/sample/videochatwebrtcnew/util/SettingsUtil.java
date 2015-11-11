@@ -7,8 +7,6 @@ import android.util.Log;
 
 import com.quickblox.sample.videochatwebrtcnew.R;
 import com.quickblox.sample.videochatwebrtcnew.User;
-import com.quickblox.sample.videochatwebrtcnew.camera.CameraHelper;
-import com.quickblox.sample.videochatwebrtcnew.sharing.CaptureFormat;
 import com.quickblox.videochat.webrtc.QBRTCMediaConfig;
 
 import java.util.List;

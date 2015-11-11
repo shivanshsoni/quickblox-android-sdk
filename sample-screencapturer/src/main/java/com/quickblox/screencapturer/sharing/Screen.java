@@ -1,4 +1,4 @@
-package com.quickblox.sample.videochatwebrtcnew.sharing;
+package com.quickblox.screencapturer.sharing;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -42,10 +42,12 @@ public class Screen {
     }
 
     public final void startPreview(){
+        Log.i(TAG, "startPreview");
         screenThreadHandler.postDelayed(capturingRunnable, SCREEN_CAPTURER_PERIOD_MS);
     }
 
     public final void stopPreview(){
+        Log.i(TAG, "stopPreview");
         screenThreadHandler.removeCallbacks(capturingRunnable);
     }
 
@@ -57,6 +59,14 @@ public class Screen {
 
     private Activity getActivity(){
         return activityRef.get();
+    }
+
+    Thread getThread() {
+        return screenThread;
+    }
+
+    public Handler getHandler() {
+        return screenThreadHandler;
     }
 
     public interface ScreenObserver{
@@ -72,6 +82,7 @@ public class Screen {
                 Log.e(TAG, "Lost activity context");
             }
             View decorView = activity.getWindow().getDecorView().getRootView();
+            decorView.setDrawingCacheEnabled(true);
             Bitmap drawingCache = decorView.getDrawingCache();
             if (drawingCache != null){
                 Log.i(TAG, "drawingCache="+drawingCache.getWidth() + ":"+drawingCache.getHeight());

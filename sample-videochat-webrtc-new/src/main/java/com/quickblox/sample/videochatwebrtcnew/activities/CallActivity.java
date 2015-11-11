@@ -29,7 +29,6 @@ import com.quickblox.sample.videochatwebrtcnew.definitions.Consts;
 import com.quickblox.sample.videochatwebrtcnew.fragments.ConversationFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.IncomeCallFragment;
 import com.quickblox.sample.videochatwebrtcnew.fragments.OpponentsFragment;
-import com.quickblox.sample.videochatwebrtcnew.fragments.ScreenCaptiringFragment;
 import com.quickblox.sample.videochatwebrtcnew.holder.DataHolder;
 import com.quickblox.sample.videochatwebrtcnew.util.FragmentExecuotr;
 import com.quickblox.sample.videochatwebrtcnew.util.RingtonePlayer;

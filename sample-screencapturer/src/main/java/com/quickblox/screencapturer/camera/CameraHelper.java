@@ -1,10 +1,10 @@
-package com.quickblox.sample.videochatwebrtcnew.camera;
+package com.quickblox.screencapturer.camera;
 
 import android.hardware.Camera;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.quickblox.sample.videochatwebrtcnew.sharing.CaptureFormat;
+import com.quickblox.screencapturer.sharing.CaptureFormat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,7 @@ public class CameraHelper {
                 maxFps = range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
             }
             for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
-                formatList.add(new CaptureFormat(size.width, size.height, minFps, maxFps));
+                formatList.add(new CaptureFormat(size.width, size.height, minFps, maxFps, false));
             }
         } catch (Exception e) {
             Log.e(TAG, "getSupportedFormats() failed on camera index " + cameraId, e);

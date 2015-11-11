@@ -1,3 +1,4 @@
+include ':sample-screencapturer'
 include 'snippets'
 include 'sample-users'
 include 'sample-ratings'
