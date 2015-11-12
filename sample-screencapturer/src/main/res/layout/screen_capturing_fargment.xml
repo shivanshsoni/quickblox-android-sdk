@@ -21,6 +21,11 @@
         android:text="Start"
         android:layout_height="wrap_content" />
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"/>
+
     <Button
         android:id="@+id/stopPreview"
         android:layout_width="wrap_content"

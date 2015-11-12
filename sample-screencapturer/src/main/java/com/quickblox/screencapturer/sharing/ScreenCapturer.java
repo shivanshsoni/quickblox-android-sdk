@@ -13,6 +13,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 
+import com.quickblox.screencapturer.IScreenshotProvider;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +56,8 @@ public class ScreenCapturer implements Screen.ScreenObserver {
     // thread that calls open(), so this is done on the CameraThread.
     public void startCapture(
             final int width, final int height, final int framerate,
-            final Context applicationContext, final CapturerSimpleObserver frameObserver) {
+            final Context applicationContext, final CapturerSimpleObserver frameObserver,
+            IScreenshotProvider screenshotProvider) {
         Log.d(TAG, "startCapture requested: " + width + "x" + height
                 + "@" + framerate);
         if (applicationContext == null) {
@@ -65,7 +68,7 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         }
 
          startCaptureOnScreenThread(width, height, framerate, frameObserver,
-                        applicationContext);
+                        applicationContext, screenshotProvider);
 
     }
 
@@ -84,13 +87,13 @@ public class ScreenCapturer implements Screen.ScreenObserver {
 
     private void startCaptureOnScreenThread(
             int width, int height, int framerate, CapturerSimpleObserver frameObserver,
-            Context applicationContext) {
+            Context applicationContext, IScreenshotProvider screenshotProvider) {
         Throwable error = null;
         //checkIsOnScreenThread();
         this.applicationContext = applicationContext;
         this.frameObserver = frameObserver;
         try {
-            obtainScreen(applicationContext);
+            obtainScreen(screenshotProvider);
             videoBuffers = new FramePool(screen.getThread());
             startPreviewOnCameraThread(width, height, framerate);
             frameObserver.OnCapturerStarted(true);
@@ -108,11 +111,9 @@ public class ScreenCapturer implements Screen.ScreenObserver {
         frameObserver.OnCapturerStarted(false);
     }
 
-    private void obtainScreen(Context applicationContext) {
-        screen = new Screen((Activity) applicationContext);
+    private void obtainScreen(IScreenshotProvider screenshotProvider) {
+        screen = new Screen(screenshotProvider);
     }
-
-
 
     private void stopCaptureOnCameraThread() {
         screen.stopPreview();

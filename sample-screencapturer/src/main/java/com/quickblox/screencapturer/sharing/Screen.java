@@ -1,13 +1,12 @@
 package com.quickblox.screencapturer.sharing;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import android.view.View;
 
-import java.lang.ref.WeakReference;
+import com.quickblox.screencapturer.IScreenshotProvider;
 
 /**
  * Created by vadim on 10/21/15.
@@ -18,35 +17,34 @@ public class Screen {
 
     private final static int SCREEN_CAPTURER_PERIOD_MS = 200;
 
-    private final CapturingRunnable capturingRunnable =  new CapturingRunnable();
+    private final CapturingRunnable capturingRunnable = new CapturingRunnable();
 
     private final HandlerThread screenThread;
     private final Handler screenThreadHandler;
-    private WeakReference<Activity> activityRef;
     private ScreenObserver screenObserver;
+    private IScreenshotProvider screenshotProvider;
 
-    public Screen(Activity activity){
-        this.activityRef = new WeakReference<>(activity);
+    public Screen(IScreenshotProvider screenshotProvider) {
+        this.screenshotProvider = screenshotProvider;
         screenThread = new HandlerThread(TAG);
         screenThread.start();
         screenThreadHandler = new Handler(screenThread.getLooper());
     }
 
-    public void release(){
+    public void release() {
         screenThread.quit();
-        activityRef = null;
     }
 
-    public void setObserver(ScreenObserver screenObserver){
+    public void setObserver(ScreenObserver screenObserver) {
         this.screenObserver = screenObserver;
     }
 
-    public final void startPreview(){
+    public final void startPreview() {
         Log.i(TAG, "startPreview");
         screenThreadHandler.postDelayed(capturingRunnable, SCREEN_CAPTURER_PERIOD_MS);
     }
 
-    public final void stopPreview(){
+    public final void stopPreview() {
         Log.i(TAG, "stopPreview");
         screenThreadHandler.removeCallbacks(capturingRunnable);
     }
@@ -57,10 +55,6 @@ public class Screen {
         }
     }
 
-    private Activity getActivity(){
-        return activityRef.get();
-    }
-
     Thread getThread() {
         return screenThread;
     }
@@ -69,7 +63,7 @@ public class Screen {
         return screenThreadHandler;
     }
 
-    public interface ScreenObserver{
+    public interface ScreenObserver {
         void onPreviewFrame(Bitmap bitmap, int rotation);
     }
 
@@ -77,17 +71,17 @@ public class Screen {
 
         @Override
         public void run() {
-            Activity activity = getActivity();
-            if (activity == null) {
-                Log.e(TAG, "Lost activity context");
+            try {
+                String file = screenshotProvider.takeScreenshot();
+                Bitmap drawingCache = BitmapFactory.decodeFile(file);
+                if (drawingCache != null) {
+                    Log.i(TAG, "drawingCache=" + drawingCache.getWidth() + ":" + drawingCache.getHeight());
+                    notifyObserver(drawingCache, -1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            View decorView = activity.getWindow().getDecorView().getRootView();
-            decorView.setDrawingCacheEnabled(true);
-            Bitmap drawingCache = decorView.getDrawingCache();
-            if (drawingCache != null){
-                Log.i(TAG, "drawingCache="+drawingCache.getWidth() + ":"+drawingCache.getHeight());
-                notifyObserver(drawingCache, -1);
-            }
+
             screenThreadHandler.postDelayed(this, SCREEN_CAPTURER_PERIOD_MS);
         }
     }
