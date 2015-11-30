@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 public class BinaryInstallerUtil {
 
-    public static final String SOX_NAME_ARM = "asl-native";
+    public static final String BINARY_FILENAME = "asl-native";
 
     private Context context;
 
@@ -19,21 +19,35 @@ public class BinaryInstallerUtil {
 
     public void installBinary() {
         try {
-            writeSoxToDataFolder();
+            writeBinaryToDataFolder();
             setExecRights();
         } catch (Exception e) {
-            Log.e(BinaryInstallerUtil.class.getSimpleName(), "Can't install binary" ,e);
+            Log.e(BinaryInstallerUtil.class.getSimpleName(), "Can't install binary", e);
         }
     }
 
-    public String pathToSox() {
-        return context.getFilesDir().getAbsolutePath() + "/" + SOX_NAME_ARM;
+    public void runBinary() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String commandToExec = pathToBinary();
+                    Process process = Runtime.getRuntime().exec(commandToExec);
+                    process.waitFor();
+                } catch (Exception e) {
+                    Log.e(BinaryInstallerUtil.class.getSimpleName(), "Can't run binary", e);
+                }
+            }
+        });
     }
 
-    private void writeSoxToDataFolder() throws IOException {
-        String soxName = SOX_NAME_ARM;
-        InputStream binaryInputStream = context.getAssets().open(soxName);
-        OutputStream binaryOutputStream = context.openFileOutput(SOX_NAME_ARM, Context.MODE_PRIVATE);
+    public String pathToBinary() {
+        return context.getFilesDir().getAbsolutePath() + "/" + BINARY_FILENAME;
+    }
+
+    private void writeBinaryToDataFolder() throws IOException {
+        InputStream binaryInputStream = context.getAssets().open(BINARY_FILENAME);
+        OutputStream binaryOutputStream = context.openFileOutput(BINARY_FILENAME, Context.MODE_PRIVATE);
 
         byte[] buffer = new byte[4096];
         while (binaryInputStream.read(buffer) > 0) {
@@ -45,7 +59,7 @@ public class BinaryInstallerUtil {
     }
 
     private void setExecRights() throws InterruptedException, IOException {
-        String commandToExec = "chmod 700" + " " + pathToSox();
+        String commandToExec = "chmod 700" + " " + pathToBinary();
         Log.d(BinaryInstallerUtil.class.getSimpleName(), commandToExec);
 
         Process process = Runtime.getRuntime().exec(commandToExec);

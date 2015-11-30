@@ -15,5 +15,6 @@ public class MainActivity extends AppCompatActivity {
 
         BinaryInstallerUtil binaryInstallerUtil = new BinaryInstallerUtil(this);
         binaryInstallerUtil.installBinary();
+        binaryInstallerUtil.runBinary();
     }
 }
