@@ -16,7 +16,7 @@
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
 
-    <string name="users_tag">webrtcusers</string>
+    <string name="users_tag">qbqa</string>
 
     <string name="welcoming_message">Login as any user on this deviсe and another(s) users on another device</string>
     <string name="select_user_to_call">Select Users You Want to Call</string>
@@ -114,5 +114,7 @@
     <string name="pref_audiocodec_dlg">Select default audio codec</string>
     <string name="btn_screen_capture">screenShot</string>
     <string name="accepted">Accepted</string>
+    <string name="dlg_accepted_another_device">Call was accepted on another device</string>
+    <string name="dlg_rejected_another_device">Call was rejected on another device</string>
 
 </resources>

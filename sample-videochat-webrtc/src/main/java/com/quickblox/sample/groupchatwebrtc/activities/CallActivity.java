@@ -20,6 +20,8 @@ import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBSignaling;
 import com.quickblox.chat.QBWebRTCSignaling;
 import com.quickblox.chat.listeners.QBVideoChatSignalingManagerListener;
+import com.quickblox.chat.model.QBChatMessage;
+import com.quickblox.sample.groupchatwebrtc.chat.SystemMessageManager;
 import com.quickblox.sample.groupchatwebrtc.definitions.Consts;
 import com.quickblox.sample.groupchatwebrtc.R;
 import com.quickblox.sample.groupchatwebrtc.adapters.OpponentsAdapter;
@@ -81,6 +83,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     private boolean wifiEnabled = true;
     private SharedPreferences sharedPref;
     private RingtonePlayer ringtonePlayer;
+    private SystemMessageManager systemMessageManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,11 +136,31 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
         QBRTCConfig.setAnswerTimeInterval(30l);
         QBRTCConfig.setDebugEnabled(true);
 
+        systemMessageManager = new SystemMessageManager(QBChatService.getInstance(),
+                this);
 
         // Add activity as callback to RTCClient
         rtcClient.addSessionCallbacksListener(this);
         // Start mange QBRTCSessions according to VideoCall parser's callbacks
         rtcClient.prepareToProcessCalls();
+
+        systemMessageManager.setMultiDeviceStatusListener(new SystemMessageManager.MultiDeviceStatusListener() {
+            @Override
+            public void onAcceptedCall(String deviceId, QBChatMessage chatMessage) {
+                showToast(R.string.dlg_accepted_another_device);
+                if (getCurrentSession() != null) {
+                    getCurrentSession().closeSession();
+                }
+            }
+
+            @Override
+            public void onRejectedCall(String deviceId, QBChatMessage chatMessage) {
+                showToast(R.string.dlg_rejected_another_device);
+                if (getCurrentSession() != null) {
+                    getCurrentSession().closeSession();
+                }
+            }
+        });
     }
 
     private void initWiFiManagerListener() {
@@ -189,6 +212,11 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     public void rejectCurrentSession() {
         if (getCurrentSession() != null) {
             getCurrentSession().rejectCall(new HashMap<String, String>());
+            try {
+                systemMessageManager.sendRejecttMessage(QBChatService.getInstance().getUser().getId());
+            } catch (SmackException.NotConnectedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -563,6 +591,12 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
                     StartConversetionReason.INCOME_CALL_FOR_ACCEPTION, getCurrentSession().getSessionID());
             // Start conversation fragment
             FragmentExecuotr.addFragment(getFragmentManager(), R.id.fragment_container, fragment, CONVERSATION_CALL_FRAGMENT);
+
+            try {
+                systemMessageManager.sendAcceptMessage(myId);
+            } catch (SmackException.NotConnectedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
