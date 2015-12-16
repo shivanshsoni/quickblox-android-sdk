@@ -149,7 +149,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             public void onAcceptedCall(String deviceId, QBChatMessage chatMessage) {
                 showToast(R.string.dlg_accepted_another_device);
                 if (getCurrentSession() != null) {
-                    getCurrentSession().closeSession();
+                    getCurrentSession().hangUp(null);
                 }
             }
 
@@ -157,7 +157,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
             public void onRejectedCall(String deviceId, QBChatMessage chatMessage) {
                 showToast(R.string.dlg_rejected_another_device);
                 if (getCurrentSession() != null) {
-                    getCurrentSession().closeSession();
+                    getCurrentSession().hangUp(null);
                 }
             }
         });
