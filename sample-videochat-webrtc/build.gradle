@@ -34,6 +34,12 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE.txt'
+
+    }
+
     productFlavors {
         speedDev {
             minSdkVersion 21
@@ -52,9 +58,12 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files(rootProject.core_jar_path, rootProject.chat_jar_path, rootProject.videochat_webrtc_jar_path)
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.android.support:support-annotations:23.1.1'
+    compile ('com.android.support:appcompat-v7:23.1.1') {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    compile ('com.android.support:recyclerview-v7:23.1.1') {
+            exclude group: 'com.android.support', module: 'support-annotations'
+    }
     compile 'com.navercorp.pulltorefresh:library:3.2.3@aar'
     compile files('libs/android-support-v4.jar')
     compile('com.crashlytics.sdk.android:crashlytics:2.2.2@aar') {

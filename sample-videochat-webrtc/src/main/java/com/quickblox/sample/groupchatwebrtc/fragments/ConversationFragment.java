@@ -19,7 +19,6 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
@@ -27,24 +26,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.quickblox.sample.groupchatwebrtc.R;
 import com.quickblox.sample.groupchatwebrtc.activities.CallActivity;
 import com.quickblox.sample.groupchatwebrtc.activities.ListUsersActivity;
 import com.quickblox.sample.groupchatwebrtc.adapters.OpponentsFromCallAdapter;
-import com.quickblox.sample.groupchatwebrtc.R;
 import com.quickblox.sample.groupchatwebrtc.definitions.Consts;
 import com.quickblox.sample.groupchatwebrtc.holder.DataHolder;
 import com.quickblox.sample.groupchatwebrtc.util.CameraUtils;
-import com.quickblox.sample.groupchatwebrtc.view.RTCGLVideoView;
 import com.quickblox.sample.groupchatwebrtc.view.RTCGLVideoView.RendererConfig;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBMediaStreamManager;
-import com.quickblox.videochat.webrtc.exception.QBRTCException;
 import com.quickblox.videochat.webrtc.QBRTCSession;
 import com.quickblox.videochat.webrtc.QBRTCTypes;
 import com.quickblox.videochat.webrtc.callbacks.QBRTCClientVideoTracksCallbacks;
 import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
+import com.quickblox.videochat.webrtc.exception.QBRTCException;
 import com.quickblox.videochat.webrtc.view.QBRTCVideoTrack;
 
+import org.webrtc.SurfaceViewRenderer;
+import org.webrtc.VideoCapturerAndroid;
 import org.webrtc.VideoRenderer;
 
 import java.io.Serializable;
@@ -88,7 +88,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     private LinearLayout actionVideoButtonsLayout;
     private String callerName;
     private boolean isMessageProcessed;
-    private RTCGLVideoView localVideoView;
+    private SurfaceViewRenderer localVideoView;
     private IntentFilter intentFilter;
     private AudioStreamReceiver audioStreamReceiver;
     private CameraState cameraState = CameraState.NONE;
@@ -217,7 +217,6 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
     }
 
     private void initViews(View view) {
-
         opponentViewHolders = new SparseArray<>(opponents.size());
 
         recyclerView = (RecyclerView) view.findViewById(R.id.grid_opponents);
@@ -396,16 +395,23 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
                 if (mediaStreamManager == null) {
                     return;
                 }
-                boolean cameraSwitched = mediaStreamManager.switchCameraInput(new Runnable() {
-                    @Override
-                    public void run() {
-                        mainHandler.post(new Runnable() {
+                mediaStreamManager.switchCameraInput(
+                        new VideoCapturerAndroid.CameraSwitchHandler() {
                             @Override
-                            public void run() {
-                                toggleCamerainternal(mediaStreamManager);
+                            public void onCameraSwitchDone(boolean b) {
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        toggleCamerainternal(mediaStreamManager);
+                                    }
+                                });
                             }
-                        });
-                    }
+
+                            @Override
+                            public void onCameraSwitchError(String s) {
+
+                            }
+
                 });
             }
 
@@ -418,8 +424,11 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         Log.d(TAG, "Camera was switched!");
         RendererConfig config = new RendererConfig();
         config.mirror = CameraUtils.isCameraFront(currentCameraId);
-        localVideoView.updateRenderer(isPeerToPeerCall ? RTCGLVideoView.RendererSurface.SECOND :
-                RTCGLVideoView.RendererSurface.MAIN, config);
+        Log.d(TAG, "isCameraFront=" + config.mirror);
+
+       /* localVideoView.updateRenderer(isPeerToPeerCall ? RTCGLVideoView.RendererSurface.SECOND :
+                RTCGLVideoView.RendererSurface.MAIN, config);*/
+
         mainHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -473,7 +482,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         if (itemHolder == null) {
             return;
         }
-        RTCGLVideoView remoteVideoView = itemHolder.getOpponentView();
+        SurfaceViewRenderer remoteVideoView = itemHolder.getOpponentView();
         if (remoteVideoView != null) {
             fillVideoView(remoteVideoView, videoTrack);
         }
@@ -487,7 +496,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             return;
         }
         if (isPeerToPeerCall) {
-            localVideoView = holder.getOpponentView();
+            localVideoView = holder.getLocalView();
             initLocalViewUI(holder.itemView);
         } else {
             //on group call we postpone initialization of localVideoView due to set it on Gui renderer.
@@ -495,7 +504,7 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
             mainHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    localVideoView = (RTCGLVideoView) ((ViewStub) getView().findViewById(R.id.localViewStub)).inflate();
+                    localVideoView = null;// (RTCGLVideoView) ((ViewStub) getView().findViewById(R.id.localViewStub)).inflate();
                     if (localVideoTrack != null) {
                         fillVideoView(localVideoView, localVideoTrack, !isPeerToPeerCall);
                     }
@@ -533,14 +542,12 @@ public class ConversationFragment extends Fragment implements Serializable, QBRT
         return null;
     }
 
-    private void fillVideoView(RTCGLVideoView videoView, QBRTCVideoTrack videoTrack, boolean remoteRenderer) {
-        videoTrack.addRenderer(new VideoRenderer(remoteRenderer ?
-                videoView.obtainVideoRenderer(RTCGLVideoView.RendererSurface.MAIN) :
-                videoView.obtainVideoRenderer(RTCGLVideoView.RendererSurface.SECOND)));
+    private void fillVideoView(SurfaceViewRenderer videoView, QBRTCVideoTrack videoTrack, boolean remoteRenderer) {
+        videoTrack.addRenderer(new VideoRenderer(videoView));
         Log.d(TAG, (remoteRenderer ? "remote" : "local") + " Track is rendering");
     }
 
-    private void fillVideoView(RTCGLVideoView videoView, QBRTCVideoTrack videoTrack) {
+    private void fillVideoView(SurfaceViewRenderer videoView, QBRTCVideoTrack videoTrack) {
         fillVideoView(videoView, videoTrack, true);
     }
 

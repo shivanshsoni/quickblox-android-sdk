@@ -10,8 +10,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.quickblox.sample.groupchatwebrtc.R;
-import com.quickblox.sample.groupchatwebrtc.view.RTCGLVideoView;
 import com.quickblox.users.model.QBUser;
+
+import org.webrtc.EglBase;
+import org.webrtc.SurfaceViewRenderer;
 
 import java.util.List;
 
@@ -106,16 +108,22 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final EglBase rootEglBase;
         TextView opponentsName;
         TextView connectionStatus;
-        RTCGLVideoView opponentView;
+        SurfaceViewRenderer opponentView;
+        SurfaceViewRenderer localView;
         private int userId;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            rootEglBase = EglBase.create();
             opponentsName = (TextView) itemView.findViewById(R.id.opponentName);
             connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
-            opponentView = (RTCGLVideoView) itemView.findViewById(R.id.opponentView);
+            opponentView = (SurfaceViewRenderer) itemView.findViewById(R.id.opponentView);
+            opponentView.init(rootEglBase.getEglBaseContext(), null);
+            localView = (SurfaceViewRenderer) itemView.findViewById(R.id.localSurfView);
+            localView.init(rootEglBase.getEglBaseContext(), null);
         }
 
         public void setStatus(String status) {
@@ -131,7 +139,11 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
             return userId;
         }
 
-        public RTCGLVideoView getOpponentView() {
+        public SurfaceViewRenderer getOpponentView() {
+            return opponentView;
+        }
+
+        public SurfaceViewRenderer getLocalView() {
             return opponentView;
         }
 
