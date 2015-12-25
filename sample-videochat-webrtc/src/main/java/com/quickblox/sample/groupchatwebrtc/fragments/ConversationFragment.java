@@ -143,6 +143,8 @@ public abstract class ConversationFragment extends Fragment implements Serializa
             Log.d(TAG, "opponents: " + opponents.toString());
         }
 
+
+        rootEglBase = EglBase.create();
         initContentView(view, contentId);
         initViews(view);
         initButtonsListener();
@@ -234,8 +236,6 @@ public abstract class ConversationFragment extends Fragment implements Serializa
         incUserName.setText(callerName);
         incUserName.setBackgroundResource(ListUsersActivity.selectBackgrounForOpponent((
                 DataHolder.getUserIndexByFullName(callerName)) + 1));
-
-        rootEglBase = EglBase.create();
         actionButtonsEnabled(false);
         initCustomView(view);
     }
