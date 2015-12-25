@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.quickblox.sample.groupchatwebrtc.R;
 import com.quickblox.users.model.QBUser;
 
-import org.webrtc.EglBase;
 import org.webrtc.SurfaceViewRenderer;
 
 import java.util.List;
@@ -22,10 +21,6 @@ import java.util.List;
  */
 public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFromCallAdapter.ViewHolder> {
 
-    public static final int OPPONENT = 1;
-    public static final int HOLDER = 2;
-
-    private static final int NUM_IN_ROW = 3;
     private static final String TAG = OpponentsFromCallAdapter.class.getSimpleName();
     private final int itemHeight;
     private final int itemWidth;
@@ -37,8 +32,6 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
     private boolean showVideoView;
     private LayoutInflater inflater;
     private int columns;
-    private OnAdapterEventListener adapterListener;
-
 
     public OpponentsFromCallAdapter(Context context, List<QBUser> users, int width, int height,
                                     int gridWidth, int columns, int itemMargin,
@@ -60,10 +53,6 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         if ((allCellWidth < gridWidth) && ((gridWidth - allCellWidth) > (itemMargin * 2))) { //set padding if it makes sense to do it
             paddingLeft = (gridWidth - allCellWidth) / 2;
         }
-    }
-
-    public void setAdapterListener(OnAdapterEventListener adapterListener) {
-        this.adapterListener = adapterListener;
     }
 
     @Override
@@ -93,9 +82,6 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 
         holder.opponentsName.setText(user.getFullName());
         holder.setUserId(user.getId());
-        if (position == (opponents.size() -1 )) {
-            adapterListener.OnBindLastViewHolder(holder, position);
-        }
     }
 
     @Override
@@ -103,33 +89,26 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         return position;
     }
 
-    public interface OnAdapterEventListener {
-        public void OnBindLastViewHolder(ViewHolder holder, int position);
-    }
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final EglBase rootEglBase;
         TextView opponentsName;
         TextView connectionStatus;
         SurfaceViewRenderer opponentView;
-        SurfaceViewRenderer localView;
         private int userId;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            rootEglBase = EglBase.create();
             opponentsName = (TextView) itemView.findViewById(R.id.opponentName);
             connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
             opponentView = (SurfaceViewRenderer) itemView.findViewById(R.id.opponentView);
-            opponentView.init(rootEglBase.getEglBaseContext(), null);
-            localView = (SurfaceViewRenderer) itemView.findViewById(R.id.localSurfView);
-            localView.init(rootEglBase.getEglBaseContext(), null);
         }
 
         public void setStatus(String status) {
             connectionStatus.setText(status);
         }
 
+        public TextView getConnectionStatus() {
+            return connectionStatus;
+        }
 
         public void setUserId(int userId) {
             this.userId = userId;
@@ -140,10 +119,6 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         }
 
         public SurfaceViewRenderer getOpponentView() {
-            return opponentView;
-        }
-
-        public SurfaceViewRenderer getLocalView() {
             return opponentView;
         }
 
