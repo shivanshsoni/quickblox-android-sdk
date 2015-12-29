@@ -8,7 +8,7 @@ public class Consts {
     public static final String AUTH_KEY = "wJHdOcQSxXQGWx5";
     public static final String AUTH_SECRET = "BTFsj7Rtt27DAmT";
 
-    public static final String VERSION_NUMBER = "1.0.12.16122015";
+    public static final String VERSION_NUMBER = "1.0.13.25122015";
 
     public static final int CALL_ACTIVITY_CLOSE = 1000;
 

@@ -24,6 +24,7 @@
         />
 
     <ViewStub android:id="@+id/main_content"
+        android:layout_margin="8dp"
         android:layout_above="@+id/element_set_video_buttons"
         android:layout_below="@+id/incUserName"
         android:layout_width="wrap_content"
