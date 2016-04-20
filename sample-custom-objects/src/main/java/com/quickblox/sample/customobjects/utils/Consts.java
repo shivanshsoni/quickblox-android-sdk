@@ -1,4 +1,4 @@
-package com.quickblox.sample.customobjects.definition;
+package com.quickblox.sample.customobjects.utils;
 
 public interface Consts {
 

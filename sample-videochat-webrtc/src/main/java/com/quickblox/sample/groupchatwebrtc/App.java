@@ -2,7 +2,7 @@ package com.quickblox.sample.groupchatwebrtc;
 
 import com.quickblox.core.QBSettings;
 import com.quickblox.sample.core.CoreApp;
-import com.quickblox.sample.groupchatwebrtc.definitions.Consts;
+import com.quickblox.sample.groupchatwebrtc.utils.Consts;
 
 public class App extends CoreApp {
 

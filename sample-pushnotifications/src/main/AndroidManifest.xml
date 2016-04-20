@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.quickblox.simplesample.messages">
+    package="com.quickblox.simplesample.pushnotifications">
 
     <permission
-        android:name="com.quickblox.simplesample.messages.permission.C2D_MESSAGE"
+        android:name="com.quickblox.simplesample.pushnotifications.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.quickblox.simplesample.messages.permission.C2D_MESSAGE" />
@@ -16,7 +16,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
-        android:name=".App"
+        android:name="com.quickblox.simplesample.pushnotifications.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -24,7 +24,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name=".activities.SplashActivity"
+            android:name="com.quickblox.simplesample.pushnotifications.activities.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,7 +33,7 @@
         </activity>
 
         <activity
-            android:name=".activities.MessagesActivity"
+            android:name="com.quickblox.simplesample.pushnotifications.activities.MessagesActivity"
             android:label="@string/activity_title"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize|adjustPan" />
@@ -51,7 +51,7 @@
         </receiver>
 
         <service
-            android:name=".gcm.GcmPushListenerService"
+            android:name="com.quickblox.simplesample.pushnotifications.gcm.GcmPushListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -59,7 +59,7 @@
         </service>
 
         <service
-            android:name=".gcm.GcmPushInstanceIDService"
+            android:name="com.quickblox.simplesample.pushnotifications.gcm.GcmPushInstanceIDService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />

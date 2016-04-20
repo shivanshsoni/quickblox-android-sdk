@@ -1,7 +1,7 @@
-package com.quickblox.simplesample.messages.gcm;
+package com.quickblox.simplesample.pushnotifications.gcm;
 
 import com.quickblox.sample.core.gcm.CoreGcmPushInstanceIDService;
-import com.quickblox.simplesample.messages.Consts;
+import com.quickblox.simplesample.pushnotifications.utils.Consts;
 
 public class GcmPushInstanceIDService extends CoreGcmPushInstanceIDService {
     @Override

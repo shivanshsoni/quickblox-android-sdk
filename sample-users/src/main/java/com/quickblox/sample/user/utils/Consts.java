@@ -1,4 +1,4 @@
-package com.quickblox.sample.user.definitions;
+package com.quickblox.sample.user.utils;
 
 public interface Consts {
 

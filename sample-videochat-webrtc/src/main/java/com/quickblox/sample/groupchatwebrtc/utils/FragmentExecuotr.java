@@ -1,4 +1,4 @@
-package com.quickblox.sample.groupchatwebrtc.util;
+package com.quickblox.sample.groupchatwebrtc.utils;
 
 import android.app.Fragment;
 import android.app.FragmentManager;

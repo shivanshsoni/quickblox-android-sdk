@@ -1,7 +1,7 @@
 package com.quickblox.sample.user;
 
 import com.quickblox.sample.core.CoreApp;
-import com.quickblox.sample.user.definitions.Consts;
+import com.quickblox.sample.user.utils.Consts;
 
 public class App extends CoreApp {
 

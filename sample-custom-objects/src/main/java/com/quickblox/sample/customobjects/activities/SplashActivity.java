@@ -9,7 +9,7 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.sample.core.ui.activity.CoreSplashActivity;
 import com.quickblox.sample.customobjects.R;
-import com.quickblox.sample.customobjects.definition.Consts;
+import com.quickblox.sample.customobjects.utils.Consts;
 import com.quickblox.users.model.QBUser;
 
 public class SplashActivity extends CoreSplashActivity {

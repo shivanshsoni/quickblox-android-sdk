@@ -1,4 +1,4 @@
-package com.quickblox.sample.groupchatwebrtc.definitions;
+package com.quickblox.sample.groupchatwebrtc.utils;
 
 /**
  * QuickBlox team

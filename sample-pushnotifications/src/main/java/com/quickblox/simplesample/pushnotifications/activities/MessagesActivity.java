@@ -1,4 +1,4 @@
-package com.quickblox.simplesample.messages.activities;
+package com.quickblox.simplesample.pushnotifications.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,10 +31,10 @@ import com.quickblox.sample.core.ui.activity.CoreBaseActivity;
 import com.quickblox.sample.core.utils.KeyboardUtils;
 import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
-import com.quickblox.simplesample.messages.ActivityLifecycle;
-import com.quickblox.simplesample.messages.App;
-import com.quickblox.simplesample.messages.Consts;
-import com.quickblox.simplesample.messages.R;
+import com.quickblox.simplesample.pushnotifications.ActivityLifecycle;
+import com.quickblox.simplesample.pushnotifications.App;
+import com.quickblox.simplesample.pushnotifications.utils.Consts;
+import com.quickblox.simplesample.pushnotifications.R;
 
 import java.util.ArrayList;
 import java.util.List;

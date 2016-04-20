@@ -1,4 +1,4 @@
-package com.quickblox.sample.groupchatwebrtc.util;
+package com.quickblox.sample.groupchatwebrtc.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

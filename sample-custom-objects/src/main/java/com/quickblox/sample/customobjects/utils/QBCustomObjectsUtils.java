@@ -1,7 +1,6 @@
 package com.quickblox.sample.customobjects.utils;
 
 import com.quickblox.customobjects.model.QBCustomObject;
-import com.quickblox.sample.customobjects.definition.Consts;
 import com.quickblox.sample.customobjects.model.Movie;
 
 import java.util.HashMap;
