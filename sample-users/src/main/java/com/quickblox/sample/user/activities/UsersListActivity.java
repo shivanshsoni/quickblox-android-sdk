@@ -86,7 +86,7 @@ public class UsersListActivity extends BaseActivity implements AdapterView.OnIte
             if (requestCode == REQUEST_CODE_SIGN_UP) {
                 qbUsersList = DataHolder.getInstance().getQBUsers();
                 Collections.rotate(qbUsersList, 1);
-                usersListAdapter.updateData(qbUsersList);
+                usersListAdapter.updateList(qbUsersList);
             }
         }
     }
@@ -208,7 +208,7 @@ public class UsersListActivity extends BaseActivity implements AdapterView.OnIte
                 DataHolder.getInstance().addQbUsers(qbUsers);
                 qbUsersList = DataHolder.getInstance().getQBUsers();
                 progressDialog.dismiss();
-                usersListAdapter.updateData(qbUsersList);
+                usersListAdapter.updateList(qbUsersList);
             }
 
             @Override

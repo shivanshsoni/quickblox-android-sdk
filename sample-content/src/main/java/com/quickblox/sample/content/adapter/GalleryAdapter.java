@@ -2,10 +2,8 @@ package com.quickblox.sample.content.adapter;
 
 import android.content.Context;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -20,19 +18,17 @@ import com.quickblox.sample.content.R;
 import com.quickblox.sample.content.helper.DownloadMoreListener;
 import com.quickblox.sample.content.utils.Consts;
 import com.quickblox.sample.content.utils.QBContentUtils;
+import com.quickblox.sample.core.ui.adapter.BaseListAdapter;
 
-public class GalleryAdapter extends BaseAdapter {
+public class GalleryAdapter extends BaseListAdapter<QBFile> {
 
-    private LayoutInflater layoutInflater;
     private SparseArray<QBFile> qbFileSparseArray;
-    private Context context;
     private DownloadMoreListener downloadListener;
     private int previousGetCount = 0;
 
     public GalleryAdapter(Context context, SparseArray<QBFile> qbFileSparseArray) {
-        this.context = context;
+        super(context);
         this.qbFileSparseArray = qbFileSparseArray;
-        layoutInflater = LayoutInflater.from(context);
     }
 
     @Override
@@ -54,7 +50,7 @@ public class GalleryAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
         if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.list_item_gallery, parent, false);
+            convertView = inflater.inflate(R.layout.list_item_gallery, parent, false);
             holder = new ViewHolder();
             holder.imageView = (ImageView) convertView.findViewById(R.id.image_preview);
             holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar_adapter);
@@ -70,12 +66,11 @@ public class GalleryAdapter extends BaseAdapter {
     }
 
     private void downloadMore(int position) {
-        if (getCount() - 1 == position) {
-            //TODO you already get Count, don't call methods for returning the same variable. Just save value as variable and reuse it.
-            //TODO As when you call method again you perform unnecessary actions
-            if (getCount() != previousGetCount) {
+        int count = getCount();
+        if (count - 1 == position) {
+            if (count != previousGetCount) {
                 downloadListener.downloadMore();
-                previousGetCount = getCount();
+                previousGetCount = count;
             }
         }
     }
