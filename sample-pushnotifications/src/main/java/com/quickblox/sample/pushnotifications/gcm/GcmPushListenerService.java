@@ -1,4 +1,4 @@
-package com.quickblox.simplesample.pushnotifications.gcm;
+package com.quickblox.sample.pushnotifications.gcm;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +9,9 @@ import com.quickblox.sample.core.gcm.CoreGcmPushListenerService;
 import com.quickblox.sample.core.utils.NotificationUtils;
 import com.quickblox.sample.core.utils.ResourceUtils;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
-import com.quickblox.simplesample.pushnotifications.ActivityLifecycle;
-import com.quickblox.simplesample.pushnotifications.R;
-import com.quickblox.simplesample.pushnotifications.activities.SplashActivity;
+import com.quickblox.sample.pushnotifications.utils.ActivityLifecycle;
+import com.quickblox.sample.pushnotifications.R;
+import com.quickblox.sample.pushnotifications.activities.SplashActivity;
 
 public class GcmPushListenerService extends CoreGcmPushListenerService {
     private static final String TAG = GcmPushListenerService.class.getSimpleName();

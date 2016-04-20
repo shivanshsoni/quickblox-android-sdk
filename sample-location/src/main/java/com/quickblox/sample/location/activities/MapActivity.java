@@ -178,17 +178,17 @@ public class MapActivity extends CoreBaseActivity implements LocationListener {
 
     public void onClickButtons(View view) {
         switch (view.getId()) {
-        case R.id.check_in_button:
-            final EditText inputEditText = new EditText(this);
-            inputEditText.setTextColor(ResourceUtils.getColor(R.color.white));
-            initAlertListeners(inputEditText);
+            case R.id.check_in_button:
+                final EditText inputEditText = new EditText(this);
+                inputEditText.setTextColor(ResourceUtils.getColor(R.color.text_color_medium_dark_grey));
+                initAlertListeners(inputEditText);
 
-            final Dialog checkInAlert = DialogUtils.createDialog(this, R.string.dlg_check_in,
-                    R.string.dlg_enter_message, inputEditText, checkInPositiveButton, checkInNegativeButton);
+                final Dialog checkInAlert = DialogUtils.createDialog(this, R.string.dlg_check_in,
+                        R.string.dlg_enter_message, inputEditText, checkInPositiveButton, checkInNegativeButton);
 
-            initAlertListeners(inputEditText);
-            checkInAlert.show();
-            break;
+                initAlertListeners(inputEditText);
+                checkInAlert.show();
+                break;
         }
     }
 

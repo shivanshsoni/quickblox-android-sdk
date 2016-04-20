@@ -1,4 +1,4 @@
-package com.quickblox.simplesample.pushnotifications;
+package com.quickblox.sample.pushnotifications.utils;
 
 import android.app.Activity;
 import android.app.Application;

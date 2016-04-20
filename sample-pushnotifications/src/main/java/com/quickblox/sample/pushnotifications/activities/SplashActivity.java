@@ -1,4 +1,4 @@
-package com.quickblox.simplesample.pushnotifications.activities;
+package com.quickblox.sample.pushnotifications.activities;
 
 import android.os.Bundle;
 import android.view.View;
@@ -9,9 +9,9 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.sample.core.ui.activity.CoreSplashActivity;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
-import com.quickblox.simplesample.pushnotifications.App;
-import com.quickblox.simplesample.pushnotifications.utils.Consts;
-import com.quickblox.simplesample.pushnotifications.R;
+import com.quickblox.sample.pushnotifications.App;
+import com.quickblox.sample.pushnotifications.R;
+import com.quickblox.sample.pushnotifications.utils.Consts;
 import com.quickblox.users.model.QBUser;
 
 public class SplashActivity extends CoreSplashActivity {

@@ -1,4 +1,4 @@
-package com.quickblox.simplesample.pushnotifications.utils;
+package com.quickblox.sample.pushnotifications.utils;
 
 public interface Consts {
 
