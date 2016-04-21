@@ -24,6 +24,7 @@ import com.quickblox.customobjects.model.QBCustomObject;
 import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.customobjects.R;
 import com.quickblox.sample.customobjects.helper.DataHolder;
+import com.quickblox.sample.customobjects.model.Movie;
 import com.quickblox.sample.customobjects.utils.QBCustomObjectsUtils;
 
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ public class AddNewMovieActivity extends BaseActivity implements TextWatcher {
     private Spinner yearSpinner;
     private RatingBar ratingBar;
     private Toast toast;
-    private String title, description, year; //TODO each variable on separate line
+    private String title;
+    private String description;
     private float rating;
 
     public static void start(Context context) {
@@ -85,7 +87,7 @@ public class AddNewMovieActivity extends BaseActivity implements TextWatcher {
     private void createNewMovie() {
         title = titleEditText.getText().toString().trim();
         description = descriptionEditText.getText().toString().trim();
-        year = yearSpinner.getSelectedItem().toString();
+        String year = yearSpinner.getSelectedItem().toString();
         rating = ratingBar.getRating();
 
         if (!isValidData()) {
@@ -100,7 +102,7 @@ public class AddNewMovieActivity extends BaseActivity implements TextWatcher {
             public void onSuccess(QBCustomObject qbCustomObject, Bundle bundle) {
                 progressDialog.dismiss();
                 Toaster.shortToast(R.string.done);
-                DataHolder.getInstance().addMovieToList(qbCustomObject);
+                DataHolder.getInstance().addMovieToMap(new Movie(qbCustomObject));
                 finish();
             }
 

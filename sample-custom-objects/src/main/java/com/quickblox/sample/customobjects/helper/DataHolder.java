@@ -1,9 +1,7 @@
 package com.quickblox.sample.customobjects.helper;
 
-import com.quickblox.customobjects.model.QBCustomObject;
 import com.quickblox.sample.customobjects.model.Movie;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,17 +33,7 @@ public class DataHolder {
         movieMap.clear();
     }
 
-    //TODO if DataHolder stores movies, logically it should work with movie.
-    // It's better to create movie outside and pass movie here
-    public void addMovieToList(QBCustomObject customObject) {
-        Movie movie = new Movie(customObject);
+    public void addMovieToMap(Movie movie) {
         movieMap.put(movie.getId(), movie);
-    }
-
-    //TODO the same
-    public void addQBCustomObject(ArrayList<QBCustomObject> qbCustomObjects) {
-        for (QBCustomObject customObject : qbCustomObjects) {
-            addMovieToList(customObject);
-        }
     }
 }

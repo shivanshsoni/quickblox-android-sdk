@@ -114,7 +114,11 @@ public class MovieListActivity extends BaseActivity implements AdapterView.OnIte
             public void onSuccess(ArrayList<QBCustomObject> qbCustomObjects, Bundle bundle) {
                 setOnRefreshListener.setEnabled(true);
                 Map<String, Movie> movieMap = DataHolder.getInstance().getMovieMap();
-                DataHolder.getInstance().addQBCustomObject(qbCustomObjects);
+
+                for (QBCustomObject customObject : qbCustomObjects) {
+                    DataHolder.getInstance().addMovieToMap(new Movie(customObject));
+                }
+
                 progressDialog.dismiss();
                 setOnRefreshListener.setRefreshing(false);
                 movieListAdapter.updateData(movieMap);

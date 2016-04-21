@@ -110,13 +110,23 @@ public class GroupChatImpl extends BaseChatImpl<QBGroupChat> implements QBMessag
         protected Object doInBackground(Object[] params) {
             DiscussionHistory history = (DiscussionHistory) params[0];
             try {
+                if (qbEntityCallback == null) {
+                    throw new CallBackException("QBEntityCallback cannot be null");
+                }
                 qbChat.join(history);
                 qbEntityCallback.onSuccess(null, Bundle.EMPTY);
-                //TODO if qbEntityCallback is null ?
+            } catch (CallBackException e) {
+                e.printStackTrace();
             } catch (XMPPException | SmackException e) {
                 qbEntityCallback.onError(new QBResponseException(e.getMessage()));
             }
             return qbEntityCallback;
+        }
+    }
+
+    private class CallBackException extends NullPointerException {
+        public CallBackException(String message) {
+            super(message);
         }
     }
 }
