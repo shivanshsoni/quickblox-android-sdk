@@ -53,6 +53,10 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public List<T> getList() {
+        return objectsList;
+    }
+
     public void remove(T item) {
         objectsList.remove(item);
         notifyDataSetChanged();

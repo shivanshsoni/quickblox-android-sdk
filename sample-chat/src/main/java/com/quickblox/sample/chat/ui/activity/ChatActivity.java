@@ -48,6 +48,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -76,6 +77,7 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
     private Chat chat;
     private QBDialog qbDialog;
     private ArrayList<String> chatMessageIds;
+    private ArrayList<QBChatMessage> unShownMessages;
     private int skipPagination = 0;
 
     public static void startForResult(Activity activity, int code, QBDialog dialog) {
@@ -280,6 +282,11 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
         if (chatAdapter != null) {
             chatAdapter.add(message);
             scrollMessageListDown();
+        } else {
+            if (unShownMessages == null) {
+                unShownMessages = new ArrayList<>();
+            }
+            unShownMessages.add(message);
         }
     }
 
@@ -486,11 +493,18 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
                             return position == chatAdapter.getCount() - 1;
                         }
                     });
+                    if (unShownMessages != null && !unShownMessages.isEmpty()) {
+                        List<QBChatMessage> chatList = chatAdapter.getList();
+                        for (QBChatMessage message : unShownMessages) {
+                            if (!chatList.contains(message)) {
+                                chatAdapter.add(message);
+                            }
+                        }
+                    }
                     messagesListView.setAdapter(chatAdapter);
                     messagesListView.setAreHeadersSticky(false);
                     messagesListView.setDivider(null);
                     progressBar.setVisibility(View.GONE);
-
                 } else {
                     chatAdapter.addList(messages);
                     messagesListView.setSelection(messages.size());
