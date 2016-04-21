@@ -24,7 +24,6 @@ import com.quickblox.sample.chat.R;
 import com.quickblox.sample.chat.utils.SharedPreferencesUtil;
 import com.quickblox.sample.chat.utils.qb.QbDialogUtils;
 import com.quickblox.sample.chat.utils.qb.QbUsersHolder;
-import com.quickblox.sample.chat.utils.qb.VerboseQbChatConnectionListener;
 import com.quickblox.sample.chat.utils.qb.callback.QbEntityCallbackTwoTypeWrapper;
 import com.quickblox.sample.chat.utils.qb.callback.QbEntityCallbackWrapper;
 import com.quickblox.sample.core.utils.Toaster;
@@ -48,7 +47,7 @@ public class ChatHelper {
     private static final int AUTO_PRESENCE_INTERVAL_IN_SECONDS = 30;
 
     public static final int DIALOG_ITEMS_PER_PAGE = 100;
-    public static final int CHAT_HISTORY_ITEMS_PER_PAGE = 100;
+    public static final int CHAT_HISTORY_ITEMS_PER_PAGE = 50;
     private static final String CHAT_HISTORY_ITEMS_SORT_FIELD = "date_sent";
 
     private static ChatHelper instance;

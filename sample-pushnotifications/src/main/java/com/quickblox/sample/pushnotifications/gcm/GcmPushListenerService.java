@@ -1,33 +1,17 @@
 package com.quickblox.sample.pushnotifications.gcm;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.quickblox.sample.core.gcm.CoreGcmPushListenerService;
 import com.quickblox.sample.core.utils.NotificationUtils;
 import com.quickblox.sample.core.utils.ResourceUtils;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
-import com.quickblox.sample.pushnotifications.utils.ActivityLifecycle;
 import com.quickblox.sample.pushnotifications.R;
 import com.quickblox.sample.pushnotifications.activities.SplashActivity;
 
 public class GcmPushListenerService extends CoreGcmPushListenerService {
-    private static final String TAG = GcmPushListenerService.class.getSimpleName();
     private static final int NOTIFICATION_ID = 1;
-
-    @Override
-    public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString(GcmConsts.EXTRA_GCM_MESSAGE);
-        Log.v(TAG, "From: " + from);
-        Log.v(TAG, "Message: " + message);
-
-        if (ActivityLifecycle.get().isBackground()) {
-            showNotification(message);
-        }
-        sendPushMessageBroadcast(message);
-    }
 
     @Override
     protected void showNotification(String message) {
@@ -43,5 +27,4 @@ public class GcmPushListenerService extends CoreGcmPushListenerService {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(gcmBroadcastIntent);
     }
-
 }

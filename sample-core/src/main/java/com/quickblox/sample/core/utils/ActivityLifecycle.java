@@ -1,4 +1,4 @@
-package com.quickblox.sample.pushnotifications.utils;
+package com.quickblox.sample.core.utils;
 
 import android.app.Activity;
 import android.app.Application;
@@ -20,7 +20,7 @@ public class ActivityLifecycle implements Application.ActivityLifecycleCallbacks
     private ActivityLifecycle() {
     }
 
-    public static ActivityLifecycle get() {
+    public static synchronized ActivityLifecycle getInstance() {
         return instance;
     }
 
