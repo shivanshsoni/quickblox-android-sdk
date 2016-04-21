@@ -161,7 +161,7 @@ public class DialogsActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (isProcessingResultInProgress){
+        if (isProcessingResultInProgress) {
             return super.onOptionsItemSelected(item);
         }
 
@@ -198,8 +198,8 @@ public class DialogsActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        isProcessingResultInProgress = true;
         if (resultCode == RESULT_OK) {
+            isProcessingResultInProgress = true;
             if (requestCode == REQUEST_SELECT_PEOPLE) {
                 ProgressDialogFragment.show(getSupportFragmentManager(), R.string.create_chat);
                 ArrayList<QBUser> selectedUsers = (ArrayList<QBUser>) data
@@ -217,9 +217,12 @@ public class DialogsActivity extends BaseActivity {
 
                     markMessagesRead(messagesIds, dialogId);
                 } else {
+                    isProcessingResultInProgress = false;
                     updateDialogsList();
                 }
             }
+        } else {
+            updateDialogsList();
         }
     }
 
@@ -285,7 +288,7 @@ public class DialogsActivity extends BaseActivity {
 
                 @Override
                 public void onError(QBResponseException e) {
-
+                    isProcessingResultInProgress = false;
                 }
             });
         } else {

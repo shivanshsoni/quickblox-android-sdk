@@ -19,6 +19,7 @@ import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.sample.chat.R;
 import com.quickblox.sample.chat.ui.adapter.CheckboxUsersAdapter;
 import com.quickblox.sample.chat.utils.Consts;
+import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 
@@ -97,17 +98,19 @@ public class SelectUsersActivity extends BaseActivity {
         lastClickTime = SystemClock.uptimeMillis();
 
         switch (item.getItemId()) {
-        case R.id.menu_select_people_action_done:
-            if (usersAdapter != null) {
-                List<QBUser> users = usersAdapter.getSelectedUsers();
-                if (users.size() >= MINIMUM_CHAT_OCCUPANTS_SIZE) {
-                    passResultToCallerActivity();
+            case R.id.menu_select_people_action_done:
+                if (usersAdapter != null) {
+                    List<QBUser> users = usersAdapter.getSelectedUsers();
+                    if (users.size() >= MINIMUM_CHAT_OCCUPANTS_SIZE) {
+                        passResultToCallerActivity();
+                    } else {
+                        Toaster.shortToast(R.string.select_users_choose_users);
+                    }
                 }
-            }
-            return true;
+                return true;
 
-        default:
-            return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
