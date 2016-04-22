@@ -119,7 +119,6 @@ public class ChatHelper {
     public boolean logout() {
         try {
             qbChatService.logout();
-            qbChatService.destroy();
             return true;
         } catch (SmackException.NotConnectedException e) {
             e.printStackTrace();
