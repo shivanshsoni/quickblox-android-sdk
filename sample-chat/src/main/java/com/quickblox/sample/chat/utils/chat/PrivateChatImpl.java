@@ -24,6 +24,7 @@ public class PrivateChatImpl extends BaseChatImpl<QBPrivateChat>
         } else {
             qbChat.addMessageListener(this);
         }
+        qbChat.addMessageSentListener(this);
     }
 
     @Override
@@ -39,6 +40,7 @@ public class PrivateChatImpl extends BaseChatImpl<QBPrivateChat>
         Log.i(TAG, "Release private chat");
         initManagerIfNeed();
 
+        qbChat.removeMessageSentListener(this);
         qbChat.removeMessageListener(this);
         qbPrivateChatManager.removePrivateChatManagerListener(this);
     }
@@ -50,12 +52,12 @@ public class PrivateChatImpl extends BaseChatImpl<QBPrivateChat>
         if (!createdLocally) {
             qbChat = incomingPrivateChat;
             qbChat.addMessageListener(this);
-            qbChat.addMessageSentListener(this);
         }
     }
 
     @Override
     public void processMessageSent(QBPrivateChat qbPrivateChat, QBChatMessage qbChatMessage) {
+        Log.i(TAG, "processMessageSent: " + qbChatMessage.getBody());
     }
 
     @Override

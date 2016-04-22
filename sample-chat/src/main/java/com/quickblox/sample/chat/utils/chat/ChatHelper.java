@@ -103,7 +103,7 @@ public class ChatHelper {
                 super.onSuccess(o, bundle);
 
                 try {
-                    QBChatService.getInstance().startAutoSendPresence(AUTO_PRESENCE_INTERVAL_IN_SECONDS);
+                    qbChatService.startAutoSendPresence(AUTO_PRESENCE_INTERVAL_IN_SECONDS);
                 } catch (SmackException.NotLoggedInException e) {
                     e.printStackTrace();
                 }
