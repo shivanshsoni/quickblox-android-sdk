@@ -94,6 +94,7 @@ public class UsersListActivity extends BaseActivity implements AdapterView.OnIte
     @Override
     public void onResume() {
         super.onResume();
+        usersListAdapter.notifyDataSetChanged();
         setActionBarTitle(DataHolder.getInstance().isSignedIn() ? DataHolder.getInstance().getSignInQbUser().getLogin()
                 : getString(R.string.not_signed_in));
     }
