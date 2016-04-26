@@ -255,7 +255,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
     public void releaseCurrentSession() {
-        this.currentSession.removeSessionnCallbacksListener(CallActivity.this);
+        this.currentSession.removeSessionCallbacksListener(CallActivity.this);
         this.currentSession.removeSignalingCallback(CallActivity.this);
         this.currentSession = null;
     }
@@ -430,7 +430,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     @Override
     public void onSessionStartClose(final QBRTCSession session) {
-        session.removeSessionnCallbacksListener(CallActivity.this);
+        session.removeSessionCallbacksListener(CallActivity.this);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -466,7 +466,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
     }
 
     @Override
-    public void onReceiveHangUpFromUser(final QBRTCSession session, final Integer userID) {
+    public void onReceiveHangUpFromUser(final QBRTCSession session, final Integer userID, Map<String, String> map) {
         if (session.equals(getCurrentSession())) {
 
             if (sessionUserCallback != null) {
@@ -588,7 +588,7 @@ public class CallActivity extends BaseLogginedUserActivity implements QBRTCClien
 
     public void removeRTCClientConnectionCallback(QBRTCSessionConnectionCallbacks clientConnectionCallbacks) {
         if (currentSession != null) {
-            currentSession.removeSessionnCallbacksListener(clientConnectionCallbacks);
+            currentSession.removeSessionCallbacksListener(clientConnectionCallbacks);
         }
     }
 

@@ -58,6 +58,7 @@ public class ChatHelper {
         if (instance == null) {
             QBSettings.getInstance().setLogLevel(LogLevel.DEBUG);
             QBChatService.setDebugEnabled(true);
+            QBChatService.setDefaultAutoSendPresenceInterval(AUTO_PRESENCE_INTERVAL_IN_SECONDS);
             instance = new ChatHelper();
         }
         return instance;
@@ -101,12 +102,6 @@ public class ChatHelper {
             @Override
             public void onSuccess(Void o, Bundle bundle) {
                 super.onSuccess(o, bundle);
-
-                try {
-                    qbChatService.startAutoSendPresence(AUTO_PRESENCE_INTERVAL_IN_SECONDS);
-                } catch (SmackException.NotLoggedInException e) {
-                    e.printStackTrace();
-                }
             }
 
             @Override
