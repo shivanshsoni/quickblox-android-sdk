@@ -105,6 +105,7 @@ public class LoginActivity extends CoreBaseActivity {
     private class OnUserLoginItemClickListener implements AdapterView.OnItemClickListener {
 
         public static final int LIST_HEADER_POSITION = 0;
+
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (position == LIST_HEADER_POSITION) {
