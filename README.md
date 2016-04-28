@@ -2,6 +2,7 @@
 
 This project contains QuickBlox Android SDK, that includes
 
+  * [Core module](https://github.com/QuickBlox/quickblox-android-sdk/tree/master/sample-core)
   * [Chat Sample](https://github.com/QuickBlox/quickblox-android-sdk/tree/master/sample-chat)
   * [Video Chat WebRTC Sample](https://github.com/QuickBlox/quickblox-android-sdk/tree/master/sample-videochat-webrtc)
   * [Users Sample](https://github.com/QuickBlox/quickblox-android-sdk/tree/master/sample-users)
