@@ -2,6 +2,7 @@ package com.quickblox.sample.chat.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.design.widget.Snackbar;
@@ -319,8 +320,8 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
         previewAdapterView.setAdapter(attachmentPreviewAdapter);
     }
 
-    private void sendChatMessage(String text, QBAttachment attachment) {
-        QBChatMessage chatMessage = new QBChatMessage();
+    private void sendChatMessage(String text, final QBAttachment attachment) {
+        final QBChatMessage chatMessage = new QBChatMessage();
         if (attachment != null) {
             chatMessage.addAttachment(attachment);
         } else {
@@ -330,27 +331,37 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
         chatMessage.setDateSent(System.currentTimeMillis() / 1000);
         chatMessage.setMarkable(true);
 
-        if (!QBDialogType.PRIVATE.equals(qbChatDialog.getType()) && !qbChatDialog.isJoined()){
+        if (!QBDialogType.PRIVATE.equals(qbChatDialog.getType()) && !qbChatDialog.isJoined()) {
             Toaster.shortToast("You're still joining a group chat, please wait a bit");
             return;
         }
 
-        try {
-            qbChatDialog.sendMessage(chatMessage);
-
-            if (QBDialogType.PRIVATE.equals(qbChatDialog.getType())) {
-                showMessage(chatMessage);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    qbChatDialog.sendMessage(chatMessage);
+                } catch (SmackException.NotConnectedException e) {
+                    Log.d(TAG, "Can'n send message");
+                }
+                return null;
             }
 
-            if (attachment != null) {
-                attachmentPreviewAdapter.remove(attachment);
-            } else {
-                messageEditText.setText("");
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if (QBDialogType.PRIVATE.equals(qbChatDialog.getType())) {
+                    showMessage(chatMessage);
+                }
+
+                if (attachment != null) {
+                    attachmentPreviewAdapter.remove(attachment);
+                } else {
+                    messageEditText.setText("");
+                }
             }
-        } catch (SmackException.NotConnectedException e) {
-            Log.w(TAG, e);
-            Toaster.shortToast("Can't send a message, You are not connected to chat");
-        }
+        }.execute();
+
     }
 
     private void initChat() {

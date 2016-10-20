@@ -64,6 +64,7 @@ public class ChatHelper {
         if (instance == null) {
             QBSettings.getInstance().setLogLevel(LogLevel.DEBUG);
             QBChatService.setDebugEnabled(true);
+            QBChatService.setDefaultPacketReplyTimeout(30000);
             QBChatService.setConfigurationBuilder(buildChatConfigs());
             instance = new ChatHelper();
         }
