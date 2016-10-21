@@ -9,6 +9,8 @@ public class SharedPreferencesUtil {
     private static final String QB_USER_PASSWORD = "qb_user_password";
     private static final String QB_USER_FULL_NAME = "qb_user_full_name";
 
+    private static final String CHAT_PORT = "chat_port";
+
     public static void saveQbUser(QBUser qbUser) {
         SharedPrefsHelper helper = SharedPrefsHelper.getInstance();
         helper.save(QB_USER_ID, qbUser.getId());
@@ -46,6 +48,21 @@ public class SharedPreferencesUtil {
         } else {
             return null;
         }
+    }
+
+    public static void saveChatPort(int chatPort){
+        SharedPrefsHelper helper = SharedPrefsHelper.getInstance();
+        helper.save(CHAT_PORT, chatPort);
+    }
+
+    public static void removeChatPort(){
+        SharedPrefsHelper helper = SharedPrefsHelper.getInstance();
+        helper.delete(CHAT_PORT);
+    }
+
+    public static int getChatPort(){
+        SharedPrefsHelper helper = SharedPrefsHelper.getInstance();
+        return helper.get(CHAT_PORT);
     }
 
 }

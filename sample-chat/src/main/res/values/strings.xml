@@ -17,6 +17,7 @@
     <string name="dlg_restoring_chat_session_logout">Restoring session and logout</string>
     <string name="create_chat">Creating chat…</string>
     <string name="dlg_login">Login…</string>
+    <string name="dlg_creating_new_connection">Creating new connection…</string>
 
     <string name="placeholder_username_you">%s (you)</string>
     <string name="error_recreate_session">Login Chat error</string>

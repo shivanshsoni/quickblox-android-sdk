@@ -83,7 +83,8 @@ public class ChatHelper {
         QBChatService.ConfigurationBuilder configurationBuilder = new QBChatService.ConfigurationBuilder();
         configurationBuilder.setKeepAlive(true)
                 .setSocketTimeout(CHAT_SOCKET_TIMEOUT)
-                .setAutojoinEnabled(false);
+                .setAutojoinEnabled(false)
+                .setPort(SharedPreferencesUtil.getChatPort());
 
         return configurationBuilder;
     }

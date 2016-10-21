@@ -11,6 +11,16 @@ public interface Consts {
     String QB_AUTH_KEY = "wJHdOcQSxXQGWx5";
     String QB_AUTH_SECRET = "BTFsj7Rtt27DAmT";
     String QB_ACCOUNT_KEY = "rz2sXxBt5xgSxGjALDW6";
+    String QB_API_DOMAIN = "https://api.quickblox.com";
+    String QB_CHAT_DOMAIN = "chat.quickblox.com";
+
+
+    String STAGE_APP_ID = "5";
+    String STAGE_AUTH_KEY = "8VSwXgcwBAjgmGx";
+    String STAGE_AUTH_SECRET = "HbW4MHU76DcyHqu";
+    String STAGE_ACCOUNT_KEY = "dhEZCzD6rPuqXU8BWDqM";
+    String STAGE_API_DOMAIN = "https://apistage5.quickblox.com";
+    String STAGE_CHAT_DOMAIN = "chatstage5.quickblox.com";
 
     String QB_USERS_TAG = "webrtcusers";
     String QB_USERS_PASSWORD = "x6Bt0VDy5";

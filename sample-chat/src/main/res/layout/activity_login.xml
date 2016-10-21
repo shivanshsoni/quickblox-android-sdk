@@ -1,4 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list_login_users"
-    style="@style/ListViewWithoutDividerStyle" />
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_root"
+    style="@style/MatchParent">
+
+    <LinearLayout
+        android:id="@+id/main_linear_leyout"
+        style="@style/MatchParent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal"
+            android:background="@color/material_grey_100">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chat port: " />
+
+            <EditText
+                android:id="@+id/port_text_dit"
+                android:inputType="number"
+                android:layout_width="64dp"
+                android:layout_height="wrap_content"
+                android:maxLength="4"
+                android:textColor="@color/black"/>
+
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/servers_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/material_grey_100"
+            android:layout_gravity="center_horizontal">
+
+            <RadioButton
+                android:id="@+id/shared_server_rario_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shared server"
+                />
+
+            <RadioButton
+                android:id="@+id/stage5_server_radio_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:text="Stage_5"
+                />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/recreate_connection_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Recreate connection"/>
+
+        <ListView
+            android:id="@+id/list_login_users"
+            style="@style/ListViewWithoutDividerStyle" />
+    </LinearLayout>
+
+</RelativeLayout>

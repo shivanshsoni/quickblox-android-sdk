@@ -22,7 +22,8 @@ public class SplashActivity extends CoreSplashActivity {
             return;
         }
 
-        createSession();
+//        createSession();
+        proceedToTheNextActivity();
     }
 
     @Override
