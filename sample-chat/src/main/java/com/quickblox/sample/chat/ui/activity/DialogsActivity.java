@@ -242,6 +242,7 @@ public class DialogsActivity extends BaseActivity implements DialogsManager.Mana
                     googlePlayServicesHelper.unregisterFromGcm(Consts.GCM_SENDER_ID);
                 }
                 SharedPreferencesUtil.removeQbUser();
+                SharedPreferencesUtil.removeChatPort();
                 LoginActivity.start(DialogsActivity.this);
                 QbDialogHolder.getInstance().clear();
                 ProgressDialogFragment.hide(getSupportFragmentManager());

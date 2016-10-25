@@ -17,12 +17,6 @@ public class SplashActivity extends CoreSplashActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (SharedPreferencesUtil.hasQbUser()) {
-            proceedToTheNextActivityWithDelay();
-            return;
-        }
-
-//        createSession();
         proceedToTheNextActivity();
     }
 
@@ -33,11 +27,7 @@ public class SplashActivity extends CoreSplashActivity {
 
     @Override
     protected void proceedToTheNextActivity() {
-        if (SharedPreferencesUtil.hasQbUser()) {
-            DialogsActivity.start(this);
-        } else {
-            LoginActivity.start(this);
-        }
+        LoginActivity.start(this);
         finish();
     }
 

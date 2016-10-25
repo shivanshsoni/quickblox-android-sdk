@@ -76,6 +76,8 @@ public class LoginActivity extends CoreBaseActivity {
             return;
         }
 
+        ChatHelper.destroyChatHelper();
+
         SharedPreferencesUtil.saveChatPort(Integer.parseInt(String.valueOf(portEditText.getText())));
         initAppCredentials(serversRadioGroup.getCheckedRadioButtonId());
 

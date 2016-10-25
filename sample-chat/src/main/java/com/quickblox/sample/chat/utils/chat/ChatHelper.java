@@ -58,7 +58,7 @@ public class ChatHelper {
 
     private static ChatHelper instance;
 
-    private QBChatService qbChatService;
+    private static QBChatService qbChatService;
 
     public static synchronized ChatHelper getInstance() {
         if (instance == null) {
@@ -68,6 +68,13 @@ public class ChatHelper {
             instance = new ChatHelper();
         }
         return instance;
+    }
+
+    public static void destroyChatHelper(){
+        instance = null;
+        if (qbChatService != null) {
+            qbChatService.destroy();
+        }
     }
 
     public static QBUser getCurrentUser() {
