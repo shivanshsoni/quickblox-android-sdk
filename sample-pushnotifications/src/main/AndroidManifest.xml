@@ -66,6 +66,22 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name="com.quickblox.sample.pushnotifications.fcm.FcmPushListenerService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name="com.quickblox.messages.services.SubscribeService"
+            android:exported="false">
+
+        </service>
+
+        <meta-data android:name="com.quickblox.messages.TYPE" android:value="FCM" />
+        <meta-data android:name="com.quickblox.messages.SENDER_ID" android:value="@string/sender_id" />
+        <meta-data android:name="com.quickblox.messages.QB_ENVIRONMENT" android:value="DEVELOPMENT" />
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

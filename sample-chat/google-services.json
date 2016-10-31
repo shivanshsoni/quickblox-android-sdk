@@ -15,7 +15,11 @@
         }
       },
       "oauth_client": [],
-      "api_key": [],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1
@@ -46,7 +50,11 @@
         }
       },
       "oauth_client": [],
-      "api_key": [],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1
@@ -77,7 +85,11 @@
         }
       },
       "oauth_client": [],
-      "api_key": [],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1

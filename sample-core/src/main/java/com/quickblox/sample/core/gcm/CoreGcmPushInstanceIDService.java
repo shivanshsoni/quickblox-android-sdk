@@ -8,7 +8,7 @@ public abstract class CoreGcmPushInstanceIDService extends InstanceIDListenerSer
     public void onTokenRefresh() {
         GooglePlayServicesHelper playServicesHelper = new GooglePlayServicesHelper();
         if (playServicesHelper.checkPlayServicesAvailable()) {
-            playServicesHelper.registerForGcm(getSenderId());
+//            playServicesHelper.registerForGcm(getSenderId());
         }
     }
 

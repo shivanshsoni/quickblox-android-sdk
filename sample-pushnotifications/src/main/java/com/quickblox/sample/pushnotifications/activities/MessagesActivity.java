@@ -26,6 +26,8 @@ import com.quickblox.messages.QBPushNotifications;
 import com.quickblox.messages.model.QBEnvironment;
 import com.quickblox.messages.model.QBEvent;
 import com.quickblox.messages.model.QBNotificationType;
+import com.quickblox.messages.services.SubscribeService;
+import com.quickblox.messages.utils.QBPushUtils;
 import com.quickblox.sample.core.gcm.GooglePlayServicesHelper;
 import com.quickblox.sample.core.ui.activity.CoreBaseActivity;
 import com.quickblox.sample.core.utils.KeyboardUtils;
@@ -47,7 +49,6 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     private ArrayAdapter<String> adapter;
 
     private List<String> receivedPushes;
-    private GooglePlayServicesHelper googlePlayServicesHelper;
 
     private BroadcastReceiver pushBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -71,10 +72,6 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
 
         receivedPushes = new ArrayList<>();
 
-        googlePlayServicesHelper = new GooglePlayServicesHelper();
-        if (googlePlayServicesHelper.checkPlayServicesAvailable(this)) {
-            googlePlayServicesHelper.registerForGcm(Consts.GCM_SENDER_ID);
-        }
         initUI();
 
         String message = getIntent().getStringExtra(GcmConsts.EXTRA_GCM_MESSAGE);
@@ -112,6 +109,10 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
                 item.setEnabled(false);
                 sendPushMessage();
                 return true;
+            case R.id.menu_unsubscribe:
+                Toaster.shortToast("UnSubscribe from pushes");
+                SubscribeService.unSubscribeFromPushes(this);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -129,7 +130,7 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     }
 
     private void registerReceiver() {
-        googlePlayServicesHelper.checkPlayServicesAvailable(this);
+        QBPushUtils.checkPlayServicesAvailable(this);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(pushBroadcastReceiver,
                 new IntentFilter(GcmConsts.ACTION_NEW_GCM_EVENT));
