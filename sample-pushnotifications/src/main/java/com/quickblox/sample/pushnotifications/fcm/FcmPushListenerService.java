@@ -7,12 +7,14 @@ import com.quickblox.sample.core.utils.ResourceUtils;
 import com.quickblox.sample.pushnotifications.R;
 import com.quickblox.sample.pushnotifications.activities.SplashActivity;
 
+import java.util.Map;
+
 public class FcmPushListenerService extends QBFcmPushListenerService {
     private static final String TAG = FcmPushListenerService.class.getSimpleName();
 
     @Override
-    protected void sendPushMessage(String message) {
-        super.sendPushMessage(message);
+    protected void sendPushMessage(Map data, String from, String message) {
+        super.sendPushMessage(data, from, message);
         showNotification(message);
     }
 

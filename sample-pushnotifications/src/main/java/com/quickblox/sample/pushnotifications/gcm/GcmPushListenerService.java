@@ -1,5 +1,7 @@
 package com.quickblox.sample.pushnotifications.gcm;
 
+import android.os.Bundle;
+
 import com.quickblox.messages.services.gcm.QBGcmPushListenerService;
 import com.quickblox.sample.core.utils.NotificationUtils;
 import com.quickblox.sample.core.utils.ResourceUtils;
@@ -9,8 +11,8 @@ import com.quickblox.sample.pushnotifications.activities.SplashActivity;
 public class GcmPushListenerService extends QBGcmPushListenerService {
 
     @Override
-    protected void sendPushMessage(String message) {
-        super.sendPushMessage(message);
+    protected void sendPushMessage(Bundle data, String from, String message) {
+        super.sendPushMessage(data, from, message);
         showNotification(message);
     }
 
