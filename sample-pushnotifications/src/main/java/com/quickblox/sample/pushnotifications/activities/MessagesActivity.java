@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
@@ -34,6 +35,7 @@ import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
 import com.quickblox.sample.pushnotifications.App;
 import com.quickblox.sample.pushnotifications.R;
+import com.quickblox.messages.Consts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,17 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
+        SharedPreferences sharedPreferences = this.getSharedPreferences("qb", Context.MODE_PRIVATE);
+
+        boolean enable = sharedPreferences.getBoolean(Consts.PREF_IS_SHOW_NOTIFICATION, QBPushSettings.getInstance().isEnableNotification());
+
+        String subtitle;
+        if (enable) {
+            subtitle = getResources().getString(R.string.subtitle_enabled);
+        } else {
+            subtitle = getResources().getString(R.string.subtitle_disabled);
+        }
+        setActionbarSubTitle(subtitle);
 
         receivedPushes = new ArrayList<>();
 
@@ -108,16 +121,23 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
                 sendPushMessage();
                 return true;
             case R.id.menu_enable_notification:
-                Toaster.shortToast("Notification enabled");
+                Toaster.shortToast(getResources().getString(R.string.subtitle_enabled));
+                setActionbarSubTitle(getResources().getString(R.string.subtitle_enabled));
                 QBPushSettings.getInstance().setEnableNotification(true);
                 return true;
             case R.id.menu_disable_notification:
-                Toaster.shortToast("Notification disabled");
+                Toaster.shortToast(getResources().getString(R.string.subtitle_disabled));
+                setActionbarSubTitle(getResources().getString(R.string.subtitle_disabled));
                 QBPushSettings.getInstance().setEnableNotification(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void setActionbarSubTitle(String subTitle) {
+        if (actionBar != null)
+            actionBar.setSubtitle(subTitle);
     }
 
     private void initUI() {
