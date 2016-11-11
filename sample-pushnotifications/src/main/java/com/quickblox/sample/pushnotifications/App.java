@@ -1,9 +1,9 @@
 package com.quickblox.sample.pushnotifications;
 
+import com.quickblox.messages.QBPushNotifications;
 import com.quickblox.sample.core.CoreApp;
 import com.quickblox.sample.core.utils.ActivityLifecycle;
 import com.quickblox.sample.pushnotifications.utils.Consts;
-import com.quickblox.messages.QBPushNotifications;
 
 public class App extends CoreApp {
 

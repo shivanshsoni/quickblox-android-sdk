@@ -16,6 +16,7 @@
     <string name="error_too_long_push">You can enter only 1000 characters!</string>
     <string name="sender_id">761750217637</string>
     <string name="subscribe">Subscribe</string>
-    <string name="unsubscribe">Unsubscribe</string>
+    <string name="enable_notification">Enable Notification</string>
+    <string name="disable_notification">Disable Notification</string>
 
 </resources>

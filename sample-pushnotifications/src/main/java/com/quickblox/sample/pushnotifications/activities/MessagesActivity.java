@@ -23,19 +23,17 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.helper.StringifyArrayList;
 import com.quickblox.messages.QBPushNotifications;
+import com.quickblox.messages.QBPushSettings;
 import com.quickblox.messages.model.QBEnvironment;
 import com.quickblox.messages.model.QBEvent;
 import com.quickblox.messages.model.QBNotificationType;
-import com.quickblox.messages.services.SubscribeService;
 import com.quickblox.messages.utils.QBPushUtils;
-import com.quickblox.sample.core.gcm.GooglePlayServicesHelper;
 import com.quickblox.sample.core.ui.activity.CoreBaseActivity;
 import com.quickblox.sample.core.utils.KeyboardUtils;
 import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
 import com.quickblox.sample.pushnotifications.App;
 import com.quickblox.sample.pushnotifications.R;
-import com.quickblox.sample.pushnotifications.utils.Consts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,9 +107,13 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
                 item.setEnabled(false);
                 sendPushMessage();
                 return true;
-            case R.id.menu_unsubscribe:
-                Toaster.shortToast("UnSubscribe from pushes");
-                SubscribeService.unSubscribeFromPushes(this);
+            case R.id.menu_enable_notification:
+                Toaster.shortToast("Notification enabled");
+                QBPushSettings.getInstance().setEnableNotification(true);
+                return true;
+            case R.id.menu_disable_notification:
+                Toaster.shortToast("Notification disabled");
+                QBPushSettings.getInstance().setEnableNotification(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
