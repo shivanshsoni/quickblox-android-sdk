@@ -172,7 +172,7 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
             invalidateOptionsMenu();
             return;
         }
-        outMessage += " (type= GCM)";
+        outMessage += " (type= FCM)";
         // Send Push: create QuickBlox Push Notification Event
         QBEvent qbEvent = new QBEvent();
         qbEvent.setNotificationType(QBNotificationType.PUSH);
