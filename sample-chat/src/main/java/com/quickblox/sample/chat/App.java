@@ -1,6 +1,6 @@
 package com.quickblox.sample.chat;
 
-import com.quickblox.core.QBSettings;
+import com.quickblox.auth.session.QBSettings;
 import com.quickblox.core.ServiceZone;
 import com.quickblox.sample.chat.utils.Consts;
 import com.quickblox.sample.core.CoreApp;

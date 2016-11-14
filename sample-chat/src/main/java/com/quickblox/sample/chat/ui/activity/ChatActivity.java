@@ -2,7 +2,6 @@ package com.quickblox.sample.chat.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.design.widget.Snackbar;
@@ -336,20 +335,9 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
             return;
         }
 
-        new AsyncTask<Void, Void, Void>() {
+        qbChatDialog.sendMessage(chatMessage, new QBEntityCallback<QBChatMessage>() {
             @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    qbChatDialog.sendMessage(chatMessage);
-                } catch (SmackException.NotConnectedException e) {
-                    Log.d(TAG, "Can'n send message");
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+            public void onSuccess(QBChatMessage message, Bundle bundle) {
                 if (QBDialogType.PRIVATE.equals(qbChatDialog.getType())) {
                     showMessage(chatMessage);
                 }
@@ -360,8 +348,12 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
                     messageEditText.setText("");
                 }
             }
-        }.execute();
 
+            @Override
+            public void onError(QBResponseException e) {
+                Log.d(TAG, "Can'n send message");
+            }
+        });
     }
 
     private void initChat() {

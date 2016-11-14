@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.quickblox.auth.QBAuth;
-import com.quickblox.auth.model.QBSession;
+import com.quickblox.auth.session.QBSession;
+import com.quickblox.auth.session.QBSettings;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBRestChatService;
 import com.quickblox.chat.extensions.connectionfabrics.QBBOSHChatConnectionFabric;
-import com.quickblox.chat.extensions.connectionfabrics.QBBoshChatConnectionConfiguration;
+import com.quickblox.chat.extensions.connectionfabrics.QBBoshConfigurationBuilder;
 import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBChatDialog;
@@ -20,7 +21,6 @@ import com.quickblox.content.model.QBFile;
 import com.quickblox.core.LogLevel;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBProgressCallback;
-import com.quickblox.core.QBSettings;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.helper.StringifyArrayList;
 import com.quickblox.core.request.QBPagedRequestBuilder;
@@ -67,7 +67,6 @@ public class ChatHelper {
             QBSettings.getInstance().setLogLevel(LogLevel.DEBUG);
             QBChatService.setDebugEnabled(true);
             QBChatService.setDefaultPacketReplyTimeout(30000);
-            QBChatService.setConfigurationBuilder(buildChatConfigs());
             QBChatService.setConnectionFabric(buildConnectionFabric());
             instance = new ChatHelper();
         }
@@ -83,16 +82,10 @@ public class ChatHelper {
         qbChatService.setUseStreamManagement(true);
     }
 
-    private static QBChatService.ConfigurationBuilder buildChatConfigs(){
-        QBChatService.ConfigurationBuilder configurationBuilder = new QBChatService.ConfigurationBuilder();
-        configurationBuilder.setAutojoinEnabled(false);
-
-        return configurationBuilder;
-    }
-
     private static QBBOSHChatConnectionFabric buildConnectionFabric(){
-        QBBoshChatConnectionConfiguration configurationBuilder = QBBoshChatConnectionConfiguration.builder()
-                .setPort(5281).build();
+        QBBoshConfigurationBuilder configurationBuilder = new QBBoshConfigurationBuilder()
+                .setPort(5281)
+                .setAutojoinEnabled(false);
 
         return new QBBOSHChatConnectionFabric(configurationBuilder);
     }

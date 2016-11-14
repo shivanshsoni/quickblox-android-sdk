@@ -110,7 +110,7 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
         holder.messageInfoTextView.setVisibility(View.GONE);
 
         if (isIncoming(chatMessage) && !isRead(chatMessage)){
-//            readMessage(chatMessage);
+            readMessage(chatMessage);
         }
 
         downloadMore(position);
@@ -284,12 +284,8 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
         return !CollectionsUtil.isEmpty(chatMessage.getReadIds()) && chatMessage.getReadIds().contains(currentUserId);
     }
 
-    private void readMessage(QBChatMessage chatMessage){
-        try {
-            chatDialog.readMessage(chatMessage);
-        } catch (XMPPException | SmackException.NotConnectedException e) {
-            Log.w(TAG, e);
-        }
+    private void readMessage(QBChatMessage chatMessage) {
+        chatDialog.readMessage(chatMessage, null);
     }
 
     private static class HeaderViewHolder {
