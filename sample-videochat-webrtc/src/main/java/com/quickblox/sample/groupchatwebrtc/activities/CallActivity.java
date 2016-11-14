@@ -16,9 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.quickblox.chat.QBChatService;
-import com.quickblox.chat.QBSignaling;
-import com.quickblox.chat.QBWebRTCSignaling;
-import com.quickblox.chat.listeners.QBVideoChatSignalingManagerListener;
+import com.quickblox.chat.QBSystemMessagesManager;
+import com.quickblox.chat.exception.QBChatException;
+import com.quickblox.chat.listeners.QBSystemMessageListener;
+import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.groupchatwebrtc.R;
 import com.quickblox.sample.groupchatwebrtc.db.QbUsersDbManager;
@@ -52,6 +53,7 @@ import com.quickblox.videochat.webrtc.exception.QBRTCException;
 import com.quickblox.videochat.webrtc.exception.QBRTCSignalException;
 
 import org.jivesoftware.smack.AbstractConnectionListener;
+import org.jivesoftware.smack.SmackException;
 import org.webrtc.VideoCapturerAndroid;
 
 import java.util.ArrayList;
@@ -74,6 +76,9 @@ public class CallActivity extends BaseActivity implements QBRTCClientSessionCall
     public static final String SESSION_ID = "sessionID";
     public static final String START_CONVERSATION_REASON = "start_conversation_reason";
 
+    final static String PARAM_KICK_USER = "kickUser";
+    final static String PARAM_SESSION_ID = "sessionID";
+    final static String PARAM_SIGNALING_TYPE = "signalType";
 
     private QBRTCSession currentSession;
     public List<QBUser> opponentsList;
@@ -104,6 +109,7 @@ public class CallActivity extends BaseActivity implements QBRTCClientSessionCall
     private boolean previousDeviceEarPiece;
     private boolean showToastAfterHeadsetPlugged = true;
     private PermissionsChecker checker;
+    private QBSystemMessagesManager systemMessagesManager;
 
     public static void start(Context context,
                              boolean isIncomingCall) {
@@ -137,12 +143,73 @@ public class CallActivity extends BaseActivity implements QBRTCClientSessionCall
         initQBRTCClient();
         initAudioManager();
         initWiFiManagerListener();
+        initSystemMessagesListener();
 
         ringtonePlayer = new RingtonePlayer(this, R.raw.beep);
         connectionView = (LinearLayout) View.inflate(this, R.layout.connection_popup, null);
 
         checker = new PermissionsChecker(getApplicationContext());
         startSuitableFragment(isInCommingCall);
+    }
+
+    private void initSystemMessagesListener() {
+        systemMessagesManager = QBChatService.getInstance().getSystemMessagesManager();
+        QBSystemMessageListener systemMessageListener = new QBSystemMessageListener() {
+            @Override
+            public void processMessage(QBChatMessage qbChatMessage) {
+                if (needHangUpCall(qbChatMessage) && getCurrentSession() != null){
+                    if (QBRTCSession.QBRTCSessionState.QB_RTC_SESSION_NEW.equals(getCurrentSession().getState())){
+                        rejectCurrentSession();
+                    } else {
+                        hangUpCurrentSession();
+                    }
+                }
+            }
+
+            @Override
+            public void processError(QBChatException e, QBChatMessage qbChatMessage) {
+
+            }
+        };
+
+        systemMessagesManager.addSystemMessageListener(systemMessageListener);
+    }
+
+    private boolean needHangUpCall(QBChatMessage systemMessage) {
+        Integer idUserForRemoving = Integer.parseInt(String.valueOf(systemMessage.getProperty(PARAM_KICK_USER)));
+        String sessionId = String.valueOf(systemMessage.getProperty(PARAM_SESSION_ID));
+        String signalingType = String.valueOf(systemMessage.getProperty(PARAM_SIGNALING_TYPE));
+        Integer senderId = systemMessage.getSenderId();
+
+
+        return signalingType.equals("update")
+                && sessionId.equals(getCurrentSession().getSessionID())
+                && idUserForRemoving.equals(QBChatService.getInstance().getUser().getId())
+                && senderId.equals(getCurrentSession().getCallerID());
+    }
+
+    private void removeUserFromCall(int userId){
+        sendMessageAboutDelete(createMessageForDeleteUser(userId));
+    }
+
+    private QBChatMessage createMessageForDeleteUser(int userId){
+        QBChatMessage systemMessage = new QBChatMessage();
+        systemMessage.setProperty(PARAM_KICK_USER, String.valueOf(userId));
+        systemMessage.setProperty(PARAM_SESSION_ID, getCurrentSession().getSessionID());
+        systemMessage.setProperty(PARAM_SIGNALING_TYPE, "update");
+        systemMessage.setProperty("moduleIdentifier", "WebRTCVideoChat");
+        systemMessage.setProperty("platform", "android");
+        return systemMessage;
+    }
+
+    private void sendMessageAboutDelete(QBChatMessage systemMessage){
+        if (systemMessagesManager != null){
+            try {
+                systemMessagesManager.sendSystemMessage(systemMessage);
+            } catch (SmackException.NotConnectedException e) {
+                //your logic
+            }
+        }
     }
 
     private void startSuitableFragment(boolean isInComingCall) {
