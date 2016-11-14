@@ -69,7 +69,7 @@ android {
 
 
 dependencies {
-    compile("com.quickblox:quickblox-android-sdk-chat:$rootProject.qbSdkVersion")
+    compile("com.quickblox:quickblox-android-sdk-chat-extensions:$rootProject.qbSdkVersion")
     compile("com.quickblox:quickblox-android-sdk-content:$rootProject.qbSdkVersion")
 
     compile(project(":sample-core"))

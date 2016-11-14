@@ -7,6 +7,8 @@ import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBSession;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBRestChatService;
+import com.quickblox.chat.extensions.connectionfabrics.QBBOSHChatConnectionFabric;
+import com.quickblox.chat.extensions.connectionfabrics.QBBoshChatConnectionConfiguration;
 import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBChatDialog;
@@ -66,6 +68,7 @@ public class ChatHelper {
             QBChatService.setDebugEnabled(true);
             QBChatService.setDefaultPacketReplyTimeout(30000);
             QBChatService.setConfigurationBuilder(buildChatConfigs());
+            QBChatService.setConnectionFabric(buildConnectionFabric());
             instance = new ChatHelper();
         }
         return instance;
@@ -82,11 +85,16 @@ public class ChatHelper {
 
     private static QBChatService.ConfigurationBuilder buildChatConfigs(){
         QBChatService.ConfigurationBuilder configurationBuilder = new QBChatService.ConfigurationBuilder();
-        configurationBuilder.setKeepAlive(true)
-                .setSocketTimeout(CHAT_SOCKET_TIMEOUT)
-                .setAutojoinEnabled(false);
+        configurationBuilder.setAutojoinEnabled(false);
 
         return configurationBuilder;
+    }
+
+    private static QBBOSHChatConnectionFabric buildConnectionFabric(){
+        QBBoshChatConnectionConfiguration configurationBuilder = QBBoshChatConnectionConfiguration.builder()
+                .setPort(5281).build();
+
+        return new QBBOSHChatConnectionFabric(configurationBuilder);
     }
 
     public void addConnectionListener(ConnectionListener listener) {
