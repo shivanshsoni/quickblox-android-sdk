@@ -110,7 +110,7 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
         holder.messageInfoTextView.setVisibility(View.GONE);
 
         if (isIncoming(chatMessage) && !isRead(chatMessage)){
-            readMessage(chatMessage);
+//            readMessage(chatMessage);
         }
 
         downloadMore(position);
