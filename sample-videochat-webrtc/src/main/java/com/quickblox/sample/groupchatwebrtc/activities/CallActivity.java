@@ -181,14 +181,20 @@ public class CallActivity extends BaseActivity implements QBRTCClientSessionCall
         String signalingType = String.valueOf(systemMessage.getProperty(PARAM_SIGNALING_TYPE));
         Integer senderId = systemMessage.getSenderId();
 
+        if (getCurrentSession() == null
+                || signalingType == null
+                || !signalingType.equals("update")
+                || sessionId == null
+                || idUserForRemoving == null){
+            return false;
+        }
 
-        return signalingType.equals("update")
-                && sessionId.equals(getCurrentSession().getSessionID())
+        return sessionId.equals(getCurrentSession().getSessionID())
                 && idUserForRemoving.equals(QBChatService.getInstance().getUser().getId())
                 && senderId.equals(getCurrentSession().getCallerID());
     }
 
-    private void removeUserFromCall(int userId){
+    public void removeUserFromCall(int userId){
         sendMessageAboutDelete(createMessageForDeleteUser(userId));
     }
 
@@ -199,6 +205,7 @@ public class CallActivity extends BaseActivity implements QBRTCClientSessionCall
         systemMessage.setProperty(PARAM_SIGNALING_TYPE, "update");
         systemMessage.setProperty("moduleIdentifier", "WebRTCVideoChat");
         systemMessage.setProperty("platform", "android");
+        systemMessage.setRecipientId(userId);
         return systemMessage;
     }
 

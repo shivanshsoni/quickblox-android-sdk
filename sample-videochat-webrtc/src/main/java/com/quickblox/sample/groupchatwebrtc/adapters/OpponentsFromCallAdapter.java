@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -123,6 +124,8 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
         ProgressBar progressBar;
         private int userId;
         private ViewHolderClickListener viewHolderClickListener;
+        private OnClickListener deleteItemListener;
+        private final ImageButton deleteItemButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -131,6 +134,20 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
             connectionStatus = (TextView) itemView.findViewById(R.id.connectionStatus);
             opponentView = (QBRTCSurfaceView) itemView.findViewById(R.id.opponentView);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar_adapter);
+
+            deleteItemButton = (ImageButton) itemView.findViewById(R.id.delete_button);
+            deleteItemButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (deleteItemListener != null){
+                        deleteItemListener.onClick(v);
+                    }
+                }
+            });
+        }
+
+        public void setVisibleDeleteButton(boolean isVisible){
+            deleteItemButton.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
         }
 
         private void setListener(ViewHolderClickListener viewHolderClickListener) {
@@ -173,6 +190,10 @@ public class OpponentsFromCallAdapter extends RecyclerView.Adapter<OpponentsFrom
 
         public interface ViewHolderClickListener {
             void onShowOpponent(int callerId);
+        }
+
+        public void setDeleteItemListener(OnClickListener clickListener){
+            deleteItemListener = clickListener;
         }
     }
 }

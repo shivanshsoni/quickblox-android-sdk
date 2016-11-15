@@ -28,6 +28,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.quickblox.chat.QBChatService;
+import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.groupchatwebrtc.R;
 import com.quickblox.sample.groupchatwebrtc.activities.CallActivity;
 import com.quickblox.sample.groupchatwebrtc.adapters.OpponentsFromCallAdapter;
@@ -582,7 +584,7 @@ public class VideoConversationFragment extends BaseConversationFragment implemen
         recyclerView.setVisibility(View.VISIBLE);
     }
 
-    private OpponentsFromCallAdapter.ViewHolder getViewHolderForOpponent(Integer userID) {
+    private OpponentsFromCallAdapter.ViewHolder getViewHolderForOpponent(final Integer userID) {
         OpponentsFromCallAdapter.ViewHolder holder = opponentViewHolders.get(userID);
         if (holder == null) {
             holder = findHolder(userID);
@@ -590,6 +592,20 @@ public class VideoConversationFragment extends BaseConversationFragment implemen
                 opponentViewHolders.append(userID, holder);
             }
         }
+
+        if (holder != null){
+            boolean currentUserIsCaller = currentUser.getId().equals(currentSession.getCallerID());
+            holder.setVisibleDeleteButton(currentUserIsCaller);
+            if (currentUserIsCaller){
+                holder.setDeleteItemListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ((CallActivity) getActivity()).removeUserFromCall(userID);
+                    }
+                });
+            }
+        }
+
         return holder;
     }
 
