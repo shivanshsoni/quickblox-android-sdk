@@ -62,16 +62,12 @@ public class DialogsManager {
     public void sendSystemMessageAboutCreatingDialog(QBSystemMessagesManager systemMessagesManager, QBChatDialog dialog) {
         QBChatMessage systemMessageCreatingDialog = buildSystemMessageAboutCreatingGroupDialog(dialog);
 
-        try {
             for (Integer recipientId : dialog.getOccupants()) {
                 if (!recipientId.equals(QBChatService.getInstance().getUser().getId())) {
                     systemMessageCreatingDialog.setRecipientId(recipientId);
-                    systemMessagesManager.sendSystemMessage(systemMessageCreatingDialog);
+                    systemMessagesManager.sendSystemMessage(systemMessageCreatingDialog, null);
                 }
             }
-        } catch (SmackException.NotConnectedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadUsersFromDialog(QBChatDialog chatDialog){

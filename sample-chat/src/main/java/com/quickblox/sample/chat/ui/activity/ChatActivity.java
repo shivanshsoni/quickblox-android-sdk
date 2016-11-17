@@ -341,19 +341,19 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
                 if (QBDialogType.PRIVATE.equals(qbChatDialog.getType())) {
                     showMessage(chatMessage);
                 }
-
-                if (attachment != null) {
-                    attachmentPreviewAdapter.remove(attachment);
-                } else {
-                    messageEditText.setText("");
-                }
             }
 
             @Override
             public void onError(QBResponseException e) {
-                Log.d(TAG, "Can'n send message");
+                Toaster.shortToast("Can'n send message " + (chatMessage.getBody() != null ? chatMessage.getBody() : "Attachment") + ". Error " + e.getMessage());
             }
         });
+
+        if (attachment != null) {
+            attachmentPreviewAdapter.remove(attachment);
+        } else {
+            messageEditText.setText("");
+        }
     }
 
     private void initChat() {
