@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
@@ -20,22 +19,21 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.quickblox.auth.session.QBSettings;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.helper.StringifyArrayList;
 import com.quickblox.messages.QBPushNotifications;
-import com.quickblox.messages.QBPushSettings;
 import com.quickblox.messages.model.QBEnvironment;
 import com.quickblox.messages.model.QBEvent;
 import com.quickblox.messages.model.QBNotificationType;
-import com.quickblox.messages.utils.QBPushUtils;
+import com.quickblox.sample.core.gcm.GooglePlayServicesHelper;
 import com.quickblox.sample.core.ui.activity.CoreBaseActivity;
 import com.quickblox.sample.core.utils.KeyboardUtils;
 import com.quickblox.sample.core.utils.Toaster;
 import com.quickblox.sample.core.utils.constant.GcmConsts;
 import com.quickblox.sample.pushnotifications.App;
 import com.quickblox.sample.pushnotifications.R;
-import com.quickblox.messages.Consts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +47,7 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     private ArrayAdapter<String> adapter;
 
     private List<String> receivedPushes;
+    GooglePlayServicesHelper googlePlayServicesHelper;
 
     private BroadcastReceiver pushBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -69,9 +68,8 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
-        SharedPreferences sharedPreferences = this.getSharedPreferences("qb", Context.MODE_PRIVATE);
-
-        boolean enable = sharedPreferences.getBoolean(Consts.PREF_IS_SHOW_NOTIFICATION, QBPushSettings.getInstance().isEnableNotification());
+        googlePlayServicesHelper = new GooglePlayServicesHelper();
+        boolean enable = QBSettings.getInstance().isEnableNotification();
 
         String subtitle;
         if (enable) {
@@ -123,12 +121,12 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
             case R.id.menu_enable_notification:
                 Toaster.shortToast(getResources().getString(R.string.subtitle_enabled));
                 setActionbarSubTitle(getResources().getString(R.string.subtitle_enabled));
-                QBPushSettings.getInstance().setEnableNotification(true);
+                QBSettings.getInstance().setEnableNotification(true);
                 return true;
             case R.id.menu_disable_notification:
                 Toaster.shortToast(getResources().getString(R.string.subtitle_disabled));
                 setActionbarSubTitle(getResources().getString(R.string.subtitle_disabled));
-                QBPushSettings.getInstance().setEnableNotification(false);
+                QBSettings.getInstance().setEnableNotification(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -152,8 +150,9 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     }
 
     private void registerReceiver() {
-        QBPushUtils.checkPlayServicesAvailable(this);
-
+        if (!googlePlayServicesHelper.checkPlayServicesAvailable(this)) {
+            return;
+        }
         LocalBroadcastManager.getInstance(this).registerReceiver(pushBroadcastReceiver,
                 new IntentFilter(GcmConsts.ACTION_NEW_GCM_EVENT));
     }
