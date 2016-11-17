@@ -32,6 +32,7 @@ import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
+import com.quickblox.core.helper.StringifyArrayList;
 import com.quickblox.core.request.QBRequestGetBuilder;
 import com.quickblox.sample.chat.R;
 import com.quickblox.sample.chat.ui.adapter.DialogsAdapter;
@@ -189,7 +190,12 @@ public class DialogsActivity extends BaseActivity implements DialogsManager.Mana
             } else if (requestCode == REQUEST_DIALOG_ID_FOR_UPDATE) {
                 if (data != null) {
                     String dialogId = data.getStringExtra(ChatActivity.EXTRA_DIALOG_ID);
-                    loadUpdatedDialog(dialogId);
+                    ArrayList<String> chatMessageIds = (ArrayList<String>) data
+                            .getSerializableExtra(ChatActivity.EXTRA_MARK_READ);
+                    StringifyArrayList<String> messagesIds = new StringifyArrayList<>();
+                    messagesIds.addAll(chatMessageIds);
+
+                    markMessageAsRead(dialogId, messagesIds);
                 } else {
                     isProcessingResultInProgress = false;
                     updateDialogsList();
@@ -205,6 +211,24 @@ public class DialogsActivity extends BaseActivity implements DialogsManager.Mana
         selectedUsers.addAll(allSelectedUsers);
         selectedUsers.remove(ChatHelper.getCurrentUser());
         return selectedUsers.size() == 1 && QbDialogHolder.getInstance().hasPrivateDialogWithUser(selectedUsers.get(0));
+    }
+
+    private void markMessageAsRead(final String dialogId, StringifyArrayList<String> messagesIds) {
+        if (messagesIds.size() > 0) {
+            ChatHelper.getInstance().markMessageaAsRead(dialogId, messagesIds, new QbEntityCallbackImpl<Void>() {
+                @Override
+                public void onSuccess(Void aVoid, Bundle bundle) {
+                    loadUpdatedDialog(dialogId);
+                }
+
+                @Override
+                public void onError(QBResponseException e) {
+                    isProcessingResultInProgress = false;
+                }
+            });
+        } else {
+            loadUpdatedDialog(dialogId);
+        }
     }
 
     private void loadUpdatedDialog(String dialogId) {

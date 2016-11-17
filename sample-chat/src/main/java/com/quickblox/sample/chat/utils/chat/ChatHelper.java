@@ -1,5 +1,7 @@
 package com.quickblox.sample.chat.utils.chat;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -8,8 +10,8 @@ import com.quickblox.auth.session.QBSession;
 import com.quickblox.auth.session.QBSettings;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBRestChatService;
-import com.quickblox.chat.extensions.connectionfabrics.QBBOSHChatConnectionFabric;
-import com.quickblox.chat.extensions.connectionfabrics.QBBoshConfigurationBuilder;
+import com.quickblox.chat.extensions.connections.bosh.QBBoshChatConnectionFabric;
+import com.quickblox.chat.extensions.connections.bosh.QBBoshConfigurationBuilder;
 import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBChatDialog;
@@ -62,6 +64,7 @@ public class ChatHelper {
 
     private QBChatService qbChatService;
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static synchronized ChatHelper getInstance() {
         if (instance == null) {
             QBSettings.getInstance().setLogLevel(LogLevel.DEBUG);
@@ -82,12 +85,13 @@ public class ChatHelper {
         qbChatService.setUseStreamManagement(true);
     }
 
-    private static QBBOSHChatConnectionFabric buildConnectionFabric(){
+    private static QBBoshChatConnectionFabric buildConnectionFabric(){
         QBBoshConfigurationBuilder configurationBuilder = new QBBoshConfigurationBuilder()
                 .setPort(5281)
-                .setAutojoinEnabled(false);
+                .setAutojoinEnabled(false)
+                .setAutoMarkDelivered(false);
 
-        return new QBBOSHChatConnectionFabric(configurationBuilder);
+        return new QBBoshChatConnectionFabric(configurationBuilder);
     }
 
     public void addConnectionListener(ConnectionListener listener) {
@@ -354,5 +358,9 @@ public class ChatHelper {
                         callback.onSuccess(messages, params);
                     }
                 });
+    }
+
+    public void markMessageaAsRead(String dialogId, StringifyArrayList<String> messagesIds, QBEntityCallback<Void> callback){
+        QBRestChatService.markMessagesAsRead(dialogId, messagesIds).performAsync(callback);
     }
 }

@@ -57,6 +57,7 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
     private static final String PROPERTY_SAVE_TO_HISTORY = "save_to_history";
 
     public static final String EXTRA_DIALOG_ID = "dialogId";
+    public static final String EXTRA_MARK_READ = "markReadIds";
 
     private ProgressBar progressBar;
     private StickyListHeadersListView messagesListView;
@@ -73,6 +74,7 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
     private ArrayList<QBChatMessage> unShownMessages;
     private int skipPagination = 0;
     private ChatMessageListener chatMessageListener;
+    private ArrayList<String> chatMessageIds;
 
     public static void startForResult(Activity activity, int code, String dialogId) {
         Intent intent = new Intent(activity, ChatActivity.class);
@@ -90,7 +92,9 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
         qbChatDialog = QbDialogHolder.getInstance().getChatDialogById(
                 getIntent().getStringExtra(EXTRA_DIALOG_ID));
         chatMessageListener = new ChatMessageListener();
-
+        
+        chatMessageIds = new ArrayList<>();
+        
         qbChatDialog.addMessageListener(chatMessageListener);
 
         initChatConnectionListener();
@@ -129,7 +133,7 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
     @Override
     public void onBackPressed() {
         releaseChat();
-        sendDialogId();
+        sendResult();
 
         super.onBackPressed();
     }
@@ -187,9 +191,10 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
         }
     }
 
-    private void sendDialogId() {
+    private void sendResult() {
         Intent result = new Intent();
         result.putExtra(EXTRA_DIALOG_ID, qbChatDialog.getDialogId());
+        result.putExtra(EXTRA_MARK_READ, chatMessageIds);
         setResult(RESULT_OK, result);
     }
 
@@ -581,7 +586,8 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
 
     public class ChatMessageListener extends QbChatDialogMessageListenerImp {
         @Override
-        public void processMessage(String s, QBChatMessage qbChatMessage, Integer integer) {
+        public void processMessage(String dialogId, QBChatMessage qbChatMessage, Integer senderId) {
+            chatMessageIds.add(qbChatMessage.getId());
             showMessage(qbChatMessage);
         }
     }
