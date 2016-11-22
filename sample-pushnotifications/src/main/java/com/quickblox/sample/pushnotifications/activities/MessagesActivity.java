@@ -69,7 +69,7 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
         googlePlayServicesHelper = new GooglePlayServicesHelper();
-        boolean enable = QBSettings.getInstance().isEnableNotification();
+        boolean enable = QBSettings.getInstance().isEnablePushNotification();
 
         String subtitle;
         if (enable) {
@@ -121,12 +121,12 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
             case R.id.menu_enable_notification:
                 Toaster.shortToast(getResources().getString(R.string.subtitle_enabled));
                 setActionbarSubTitle(getResources().getString(R.string.subtitle_enabled));
-                QBSettings.getInstance().setEnableNotification(true);
+                QBSettings.getInstance().setEnablePushNotification(true);
                 return true;
             case R.id.menu_disable_notification:
                 Toaster.shortToast(getResources().getString(R.string.subtitle_disabled));
                 setActionbarSubTitle(getResources().getString(R.string.subtitle_disabled));
-                QBSettings.getInstance().setEnableNotification(false);
+                QBSettings.getInstance().setEnablePushNotification(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -150,8 +150,11 @@ public class MessagesActivity extends CoreBaseActivity implements TextWatcher {
     }
 
     private void registerReceiver() {
-        if (!googlePlayServicesHelper.checkPlayServicesAvailable(this)) {
-            return;
+        Log.d("AppMessage", "registerReceiver App.playServicesAbility= " + App.playServicesAbility);
+        if (!App.playServicesAbility) {
+            if (!googlePlayServicesHelper.checkPlayServicesAvailable(this)) {
+                return;
+            }
         }
         LocalBroadcastManager.getInstance(this).registerReceiver(pushBroadcastReceiver,
                 new IntentFilter(GcmConsts.ACTION_NEW_GCM_EVENT));
