@@ -203,7 +203,6 @@ public class CallActivity extends BaseActivity implements QBRTCClientSessionCall
         systemMessage.setProperty(PARAM_KICK_USER, String.valueOf(userId));
         systemMessage.setProperty(PARAM_SESSION_ID, getCurrentSession().getSessionID());
         systemMessage.setProperty(PARAM_SIGNALING_TYPE, "update");
-        systemMessage.setProperty("moduleIdentifier", "WebRTCVideoChat");
         systemMessage.setProperty("platform", "android");
         systemMessage.setRecipientId(userId);
         return systemMessage;
