@@ -102,7 +102,6 @@ public class UsersListActivity extends BaseActivity implements AdapterView.OnIte
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DataHolder.getInstance().setSignInQbUser(null);
     }
 
     @Override
