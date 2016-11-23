@@ -340,9 +340,9 @@ public class ChatActivity extends BaseActivity implements OnImagePickedListener 
             return;
         }
 
-        qbChatDialog.sendMessage(chatMessage, new QBEntityCallback<QBChatMessage>() {
+        qbChatDialog.sendMessage(chatMessage, new QBEntityCallback<Void>() {
             @Override
-            public void onSuccess(QBChatMessage message, Bundle bundle) {
+            public void onSuccess(Void aVoid, Bundle bundle) {
                 if (QBDialogType.PRIVATE.equals(qbChatDialog.getType())) {
                     showMessage(chatMessage);
                 }
