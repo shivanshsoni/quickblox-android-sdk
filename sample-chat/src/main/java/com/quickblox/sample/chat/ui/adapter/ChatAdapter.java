@@ -182,7 +182,9 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
                         @Override
                         public boolean onException(Exception e, String model,
                                                    Target<GlideDrawable> target, boolean isFirstResource) {
-                            e.printStackTrace();
+                            if (e != null) {
+                                e.printStackTrace();
+                            }
                             holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                             holder.attachmentProgressBar.setVisibility(View.GONE);
                             return false;
