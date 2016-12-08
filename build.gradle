@@ -13,7 +13,7 @@ allprojects {
     repositories {
         jcenter()
         maven {
-            url "https://github.com/QuickBlox/quickblox-android-sdk-releases/raw/master/"
+            url= "file://Users/tereha/StudioProjects/quickblox-android-sdk-releases"
         }
     }
 
@@ -32,7 +32,7 @@ ext {
     lintAbortOnError = false
 
     // QuickBlox SDK version
-    qbSdkVersion = '3.2.0'
+    qbSdkVersion = '3.2.1_beta'
 
     versionName = "3.0"
 
