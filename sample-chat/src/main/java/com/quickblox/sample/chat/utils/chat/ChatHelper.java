@@ -87,10 +87,11 @@ public class ChatHelper {
 
     private static QBBoshChatConnectionFabric buildConnectionFabric(){
         QBBoshConfigurationBuilder configurationBuilder = new QBBoshConfigurationBuilder()
-                .setPort(5281)
-                .setUseTls(false)
-                .setAutojoinEnabled(false)
-                .setAutoMarkDelivered(true);
+//                .setPort(5281)
+//                .setUseTls(false)
+                .setKeepAlive(false)
+                .setAutoMarkDelivered(true)
+                .setAutojoinEnabled(false);
 
         return new QBBoshChatConnectionFabric(configurationBuilder);
     }
