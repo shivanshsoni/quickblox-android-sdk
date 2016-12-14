@@ -1,20 +1,16 @@
 package com.quickblox.sample.chat.utils.chat;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.quickblox.auth.QBAuth;
-import com.quickblox.auth.session.QBSession;
 import com.quickblox.auth.session.QBSettings;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBRestChatService;
 import com.quickblox.chat.extensions.connections.bosh.QBBoshChatConnectionFabric;
 import com.quickblox.chat.extensions.connections.bosh.QBBoshConfigurationBuilder;
 import com.quickblox.chat.model.QBAttachment;
-import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBChatDialog;
+import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.chat.request.QBDialogRequestBuilder;
 import com.quickblox.chat.utils.DialogUtils;
@@ -64,7 +60,6 @@ public class ChatHelper {
 
     private QBChatService qbChatService;
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static synchronized ChatHelper getInstance() {
         if (instance == null) {
             QBSettings.getInstance().setLogLevel(LogLevel.DEBUG);
@@ -107,10 +102,10 @@ public class ChatHelper {
 
     public void login(final QBUser user, final QBEntityCallback<Void> callback) {
         // Create REST API session on QuickBlox
-        QBAuth.createSession(user).performAsync(new QbEntityCallbackTwoTypeWrapper<QBSession, Void>(callback) {
+        QBUsers.signIn(user).performAsync(new QbEntityCallbackTwoTypeWrapper<QBUser, Void>(callback) {
             @Override
-            public void onSuccess(QBSession session, Bundle args) {
-                user.setId(session.getUserId());
+            public void onSuccess(QBUser qbUser, Bundle args) {
+                user.setId(qbUser.getId());
                 loginToChat(user, new QbEntityCallbackWrapper<>(callback));
             }
         });
@@ -135,21 +130,11 @@ public class ChatHelper {
         });
     }
 
-    public void join(QBChatDialog chatDialog, final QBEntityCallback<Void> callback){
+    public void join(QBChatDialog chatDialog, final QBEntityCallback<Void> callback) {
         DiscussionHistory history = new DiscussionHistory();
         history.setMaxStanzas(0);
 
-        chatDialog.join(history, new QbEntityCallbackWrapper<Void>(callback) {
-            @Override
-            public void onSuccess(final Void result, final Bundle b) {
-                onSuccessInMainThread(result, b);
-            }
-
-            @Override
-            public void onError(final QBResponseException e) {
-                onErrorInMainThread(e);
-            }
-        });
+        chatDialog.join(history, callback);
     }
 
     public void leaveChatDialog(QBChatDialog chatDialog) throws XMPPException, SmackException.NotConnectedException {
@@ -184,7 +169,7 @@ public class ChatHelper {
     }
 
     public void deleteDialog(QBChatDialog qbDialog, QBEntityCallback<Void> callback) {
-        if (qbDialog.getType() == QBDialogType.PUBLIC_GROUP){
+        if (qbDialog.getType() == QBDialogType.PUBLIC_GROUP) {
             Toaster.shortToast(R.string.public_group_chat_cannot_be_deleted);
         } else {
             QBRestChatService.deleteDialog(qbDialog.getDialogId(), false)
@@ -277,7 +262,7 @@ public class ChatHelper {
                 });
     }
 
-    public void getDialogById(String dialogId, final QBEntityCallback <QBChatDialog> callback) {
+    public void getDialogById(String dialogId, final QBEntityCallback<QBChatDialog> callback) {
         QBRestChatService.getChatDialogById(dialogId).performAsync(callback);
     }
 

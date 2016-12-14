@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.quickblox.auth.session.QBSettings;
 
+
 public class CoreApp extends Application {
 
     private static CoreApp instance;
