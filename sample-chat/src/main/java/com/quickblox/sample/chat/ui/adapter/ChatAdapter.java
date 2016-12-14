@@ -32,9 +32,6 @@ import com.quickblox.sample.core.ui.adapter.BaseListAdapter;
 import com.quickblox.sample.core.utils.ResourceUtils;
 import com.quickblox.users.model.QBUser;
 
-import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -44,6 +41,7 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
 
     private static final String TAG = ChatAdapter.class.getSimpleName();
     private final QBChatDialog chatDialog;
+    private final QBUser currentUser;
     private OnItemInfoExpandedListener onItemInfoExpandedListener;
     private PaginationHistoryListener paginationListener;
     private int previousGetCount = 0;
@@ -51,6 +49,7 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
     public ChatAdapter(Context context, QBChatDialog chatDialog, List<QBChatMessage> chatMessages) {
         super(context, chatMessages);
         this.chatDialog = chatDialog;
+        currentUser = ChatHelper.getCurrentUser();
     }
 
     public void setOnItemInfoExpandedListener(OnItemInfoExpandedListener onItemInfoExpandedListener) {
@@ -273,13 +272,11 @@ public class ChatAdapter extends BaseListAdapter<QBChatMessage> implements Stick
     }
 
     private boolean isIncoming(QBChatMessage chatMessage) {
-        QBUser currentUser = ChatHelper.getCurrentUser();
         return chatMessage.getSenderId() != null && !chatMessage.getSenderId().equals(currentUser.getId());
     }
 
     private boolean isRead(QBChatMessage chatMessage){
-        Integer currentUserId = ChatHelper.getCurrentUser().getId();
-        return !CollectionsUtil.isEmpty(chatMessage.getReadIds()) && chatMessage.getReadIds().contains(currentUserId);
+        return !CollectionsUtil.isEmpty(chatMessage.getReadIds()) && chatMessage.getReadIds().contains(currentUser.getId());
     }
 
     private void readMessage(QBChatMessage chatMessage) {

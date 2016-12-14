@@ -69,7 +69,7 @@ public class ChatHelper {
         if (instance == null) {
             QBSettings.getInstance().setLogLevel(LogLevel.DEBUG);
             QBChatService.setDebugEnabled(true);
-            QBChatService.setDefaultPacketReplyTimeout(40000);
+            QBChatService.setDefaultPacketReplyTimeout(8000);
             QBChatService.setConnectionFabric(buildConnectionFabric());
             instance = new ChatHelper();
         }
@@ -87,6 +87,7 @@ public class ChatHelper {
 
     private static QBBoshChatConnectionFabric buildConnectionFabric(){
         QBBoshConfigurationBuilder configurationBuilder = new QBBoshConfigurationBuilder()
+        .setPort(443).setHost("bosh.fieldbit.net")
 //                .setPort(5281)
 //                .setUseTls(false)
                 .setKeepAlive(false)
