@@ -12,15 +12,22 @@ public interface Consts {
 //    String QB_AUTH_SECRET = "BTFsj7Rtt27DAmT";
 //    String QB_ACCOUNT_KEY = "rz2sXxBt5xgSxGjALDW6";
 //
-    //stage5 configs
+    //QuickBlox QA configs
     String QB_APP_ID = "10";
     String QB_AUTH_KEY = "6jBqsOAfEHJswv3";
     String QB_AUTH_SECRET = "yWKGgVmtX6ZqmCg";
-    String QB_ACCOUNT_KEY = "yWKGgVmtX6ZqmCg";
+    String QB_USERS_TAG = "qbusers";
+
+    //FieldBit configs
+//    String QB_APP_ID = "1";
+//    String QB_AUTH_KEY = "khz5UR63NTfqMCC";
+//    String QB_AUTH_SECRET = "6hZFGb6c8QMZY4-";
+//    String QB_USERS_TAG = "webrtcusers";
+
+    String QB_ACCOUNT_KEY = "v6rMo2bJU8THie9ousC1";
     String API_DOMAIN = "https://apifieldbit.quickblox.com";
     String CHAT_DOMAIN = "chat.fieldbit.net";
 
-    String QB_USERS_TAG = "qbusers";
     String QB_USERS_PASSWORD = "x6Bt0VDy5";
 
     int PREFERRED_IMAGE_SIZE_PREVIEW = ResourceUtils.getDimen(R.dimen.chat_attachment_preview_size);

@@ -37,6 +37,7 @@ import com.quickblox.users.model.QBUser;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.proxy.ProxyInfo;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 
 import java.io.File;
@@ -81,11 +82,9 @@ public class ChatHelper {
     }
 
     private static QBBoshChatConnectionFabric buildConnectionFabric(){
+        ProxyInfo proxyInfo = new ProxyInfo(ProxyInfo.ProxyType.HTTP, "10.30.30.1", 3128, null, null);
         QBBoshConfigurationBuilder configurationBuilder = new QBBoshConfigurationBuilder()
-        .setPort(443).setHost("bosh.fieldbit.net")
-//                .setPort(5281)
-//                .setUseTls(false)
-                .setKeepAlive(false)
+        .setPort(443).setHost("bosh.fieldbit.net").setProxyInfo(proxyInfo)
                 .setAutoMarkDelivered(true)
                 .setAutojoinEnabled(false);
 
