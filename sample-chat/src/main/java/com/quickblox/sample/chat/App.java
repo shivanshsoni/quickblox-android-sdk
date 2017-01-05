@@ -18,8 +18,8 @@ public class App extends CoreApp {
         super.onCreate();
         ActivityLifecycle.init(this);
 
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("10.30.30.1", 3128));
-        QBHttpConnectionConfig.setProxy(proxy);
+//        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("10.30.30.1", 3128));
+//        QBHttpConnectionConfig.setProxy(proxy);
 
         initCredentials(Consts.QB_APP_ID, Consts.QB_AUTH_KEY, Consts.QB_AUTH_SECRET, Consts.QB_ACCOUNT_KEY);
 

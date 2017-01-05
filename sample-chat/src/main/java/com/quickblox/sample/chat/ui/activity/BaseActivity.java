@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.View;
 
+import com.quickblox.chat.QBChatService;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.sample.chat.R;
@@ -37,9 +38,11 @@ public abstract class BaseActivity extends CoreBaseActivity implements QbSession
 
         boolean wasAppRestored = savedInstanceState != null;
         boolean isQbSessionActive = QbAuthUtils.isSessionActive();
-        final boolean needToRestoreSession = wasAppRestored || !isQbSessionActive;
+        boolean isLoggedInToChat = QBChatService.getInstance().isLoggedIn();
+        final boolean needToRestoreSession = wasAppRestored || !isQbSessionActive || !isLoggedInToChat;
         Log.v(TAG, "wasAppRestored = " + wasAppRestored);
         Log.v(TAG, "isQbSessionActive = " + isQbSessionActive);
+        Log.v(TAG, "isLoggedInToChat = " + isLoggedInToChat);
 
         // Triggering callback via Handler#post() method
         // to let child's code in onCreate() to execute first

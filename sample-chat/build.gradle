@@ -25,7 +25,7 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 202
-        versionName "3.1_BOSH"
+        versionName "3.3.0 BOSH"
     }
 
     productFlavors {

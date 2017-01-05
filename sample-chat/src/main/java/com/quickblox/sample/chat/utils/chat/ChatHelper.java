@@ -82,9 +82,11 @@ public class ChatHelper {
     }
 
     private static QBBoshChatConnectionFabric buildConnectionFabric(){
-        ProxyInfo proxyInfo = new ProxyInfo(ProxyInfo.ProxyType.HTTP, "10.30.30.1", 3128, null, null);
+//        ProxyInfo proxyInfo = new ProxyInfo(ProxyInfo.ProxyType.HTTP, "10.30.30.1", 3128, null, null);
         QBBoshConfigurationBuilder configurationBuilder = new QBBoshConfigurationBuilder()
-        .setPort(443).setHost("bosh.fieldbit.net").setProxyInfo(proxyInfo)
+////        .setPort(443)
+////                .setHost("bosh.fieldbit.net")
+////                .setProxyInfo(proxyInfo)
                 .setAutoMarkDelivered(true)
                 .setAutojoinEnabled(false);
 
