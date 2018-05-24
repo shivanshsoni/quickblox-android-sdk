@@ -9,6 +9,9 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
+import com.quickblox.auth.session.QBSettings
+import com.quickblox.chat.QBChatService
+import com.quickblox.core.LogLevel
 import com.quickblox.core.QBEntityCallback
 import com.quickblox.core.exception.QBResponseException
 import com.quickblox.sample.videochatkotlin.R
@@ -27,11 +30,15 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var adapter: ArrayAdapter<String>
     var progressDialog: ProgressDialog? = null
     private var opponents: ArrayList<QBUser>? = null
+    private val qbChatService: QBChatService = QBChatService.getInstance()
+    val isLoggedIn: Boolean
+        get() = QBChatService.getInstance().isLoggedIn
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         supportActionBar?.setTitle(R.string.title_login_activity)
+        initChat()
         initQBUsers()
         initUserAdapter()
     }
@@ -51,6 +58,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun initChat() {
+        QBSettings.getInstance().logLevel = LogLevel.DEBUG
+        QBChatService.setDebugEnabled(true)
+        QBChatService.setConfigurationBuilder(QBChatService.ConfigurationBuilder().apply { socketTimeout = 0 })
+    }
+
     private fun startCallActivity() {
         val intent = Intent(this, CallActivity::class.java)
         intent.putExtra(EXTRA_QB_USERS_LIST, opponents)
@@ -60,10 +73,10 @@ class LoginActivity : AppCompatActivity() {
 
     private fun loginToQB(user: QBUser) {
         showProgress(R.string.dlg_login)
-        ChatHelper.instance.login(user, object : QBEntityCallback<Void> {
-            override fun onSuccess(void: Void?, p1: Bundle?) {
-                hideProgress()
-                loadUsers()
+        QBUsers.signIn(user).performAsync(object : QBEntityCallback<QBUser> {
+            override fun onSuccess(qbUser: QBUser, args: Bundle) {
+                user.id = qbUser.id!!
+                loginToChat(user)
             }
 
             override fun onError(ex: QBResponseException) {
@@ -73,6 +86,21 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
+    fun loginToChat(user: QBUser) {
+        if (!isLoggedIn) {
+            qbChatService.login(user, object : QBEntityCallback<Void> {
+                override fun onSuccess(void: Void?, bundle: Bundle?) {
+                    hideProgress()
+                    loadUsers()
+                }
+
+                override fun onError(ex: QBResponseException) {
+                    hideProgress()
+                    Toast.makeText(applicationContext, getString(R.string.login_chat_login_error, ex.message), Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
+    }
 
     fun loadUsers() {
         showProgress(R.string.dlg_loading_opponents)

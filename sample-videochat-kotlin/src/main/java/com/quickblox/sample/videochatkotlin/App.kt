@@ -1,9 +1,7 @@
 package com.quickblox.sample.videochatkotlin
 
 import android.app.Application
-import android.text.TextUtils
 import com.quickblox.auth.session.QBSettings
-import com.quickblox.core.ServiceZone
 import com.quickblox.sample.videochatkotlin.utils.SAMPLE_CONFIG_FILE_NAME
 import com.quickblox.sample.videochatkotlin.utils.getAllUsersFromFile
 import com.quickblox.users.model.QBUser
